@@ -1,0 +1,211 @@
+<div class="container-fluid">
+    <div class="row py-3">
+        <div class="col-md-12">
+
+            <h3>What's the purpose for collecting this data and what will be done
+                with it?</h3>
+            <p>Your Trolley Trends data could be very valuable in observing the Cost of
+                Living crisis, it could be used to identify rising prices or
+                shrink-flation. It could be used to enhance or interface with other
+                datasets to understand calorific consumption trends or you could see how
+                your shopping habits compare to others in the same area. Exactly how it
+                will be used has not been defined upfront, this is permitted as the data
+                is anonymous.</p>
+            <p>The intention is to make the dataset available
+                to anyone who wants to use it under an <a href="https://opendatacommons.org/" target="_blank"
+                    rel="noopener">
+                    Open Data Commons</a> licence.</p> However, before any public release,
+            it will be necessary to further evaluate the likelihood of identifiability
+            and this is likely to depend on the size and variance of the data collected.
+        </div>
+    </div>
+    <div class="row py-3">
+        <div class="col-md-12">
+
+            <h3>What data is collected?</h3>
+            <p>Three datasets are submitted. The datasets and a description of the
+                fields are: </p>
+
+            <ul>
+                <li>
+                    Purchases data
+                    <ul>
+                        <li>guid - a theoretically unique identifier generated based on
+                            the contents of this record (one-way hash), this is so that
+                            if the record is resubmitted, the duplicate can be
+                            identified</li>
+                        <li>date - the date, with the time removed, on which the
+                            purchase was made</li>
+                        <li>storeName - the name of the store as supplied in the
+                            original data</li>
+                        <li>storeId - the storeId as supplied in the original data</li>
+                        <li>storeFormat - the storeFormat as supplied in the original
+                            data</li>
+                        <li>purchaseType - the purchaseType as supplied in the original
+                            data</li>
+                        <li>basketValueGross - the basketValueGross shuffled within 20p
+                            of the original value</li>
+                        <li>basketValueNet - the basketValueNet shuffled by the same
+                            amount as basketValueGross</li>
+                        <li>overallBasketSavings - the overallBasketSavings as supplied
+                            in the original data</li>
+                        <li>totalItems - the total number of items as counted from the
+                            original data</li>
+                    </ul>
+                </li>
+                <li>
+                    Products data
+                    <ul>
+                        <li>date - the date, with the time removed, on which the
+                            purchase was made</li>
+                        <li>name - the name of the product as supplied in the original
+                            data</li>
+                        <li>price - the price of the product as supplied in the original
+                            data</li>
+                        <li>storeId - the storeId as supplied in the original data</li>
+                        <li>storeName - the name of the store as supplied in the
+                            original data</li>
+                        <li>storeFormat - the storeFormat as supplied in the original
+                            data</li>
+                        <li>guid - a theoretically unique identifier generated based on
+                            the contents of this record (one-way hash), this is so that
+                            if the record is resubmitted, the duplicate can be
+                            identified</li>
+                    </ul>
+                </li>
+                <li>
+                    Weekly data
+                    <ul>
+                        <li>weekCommencing - the date of the Monday of the week which
+                            this data is summed for</li>
+                        <li>totalBasketValueGross - the sum of basketValueGross for
+                            purchases made within this week shuffled within 20p
+                            of the original value</li>
+                        <li>totalBasketValueNet - the sum of basketValueNet for
+                            purchases made within this week shuffled by the same amount as the totalBasketValueGross
+                        </li>
+                        <li>totalOverallBasketSavings - the sum of overallBasketSavings
+                            for purchases made within this week</li>
+                        <li>totalItems - the total number of items for all purchases
+                            made within this week</li>
+                        <li>submission - a theoretically unique randomly generated
+                            identifier for this submission. This enables weeks in the
+                            same submission to be grouped, but a subsequent submission
+                            containing the same records would generate a new
+                            identifier</li>
+                        <li>outcode - the first part of the postcode (to the left of the space)
+                            taken from the Clubcard account postal address field. This
+                            will indicate the current region of residence.
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+
+            <p>The three datasets do not have keys which relate them to each other.</p>
+
+            <p>The Weekly data dataset is the only dataset where the records are grouped by submission.</p>
+
+        </div>
+    </div>
+    <div class="row py-3">
+        <div class="col-md-12">
+
+            <h3 class="py-3">How is the data anonymous and not merely pseudo-anonymous?</h3>
+            <p>Psuedo-anonymous data does not have any individual identifiers but can, with the use of additional
+                information, be
+                attributed back to an individual.
+                Anonymous data cannot be related back to an individual by 'means reasonably likely to be used'.</p>
+            <p>Pseudo-anonymised data is still considered
+                personal data and so falls under the remit of GDPR and other data
+                production legislation.</p>
+            <p>To collect, retain and share this data, it is important to ensure it is anonymous.</p>
+            <p>N.B. The Clubcard data may refer to multiple individuals within a single
+                household, or with another relationship, however, as it may also relate to a single person,
+                'individual' is the
+                term that has been used and applied. </p>
+
+            <h3 class="py-3">Test cases for anonymisation vs psuedo-anonymisation</h3>
+            <p>
+                The below contains the challenges and reasoning to support that the data is pseudo-anonymised.
+            </p>
+
+            <h4 class="h5">The following supplementary personal information is considered to be 'reasonably likely
+                to be used':</h4>
+            <ul>
+                <li>Observation of an individual checkout (store, time, potentially the amount spent, and
+                    potentially some items purchased).</li>
+                <li>A receipt belonging to a known individual (store, time, amount spent, and items purchased).</li>
+                <li>A bank or credit card statement (store, date, and amount spent).</li>
+                <li> An awareness of the postcode outcode (the part to the left of the space) of the individual's
+                    residence.</li>
+                <li>A version of the JSON data that was submitted (but not containing all the same information).
+                </li>
+            </ul>
+
+            <h4 class="h5">Would it be possible to identify exactly what products the individual purchased?</h4>
+            <p class="fw-semibold">No.</p>
+            <ul>
+                <li>There is no relationship between a purchase and the items purchased or between products
+                    purchased together, so it
+                    would not be possible to retrieve the items relating to that purchase.</li>
+            </ul>
+
+            <h4 class="h5">Would it be possible to retrieve additional information about a purchase?</h4>
+            <p class="fw-semibold">Reasonably unlikely.</p>
+            <ul>
+                <li>Assuming that the store, purchase time and basketValueNet (amount spent) are known - the
+                    additional information that could be
+                    available are the totalItems, basketValueGross and overallBasketSavings.
+                <li>Only the date (not the time) is collected for a purchase, this
+                    significantly reduces the likelihood of identifying a single purchase in the data as many
+                    purchases will be made in a store on a single day.</li>
+                <li>The amount spent (basketValueNet) is offset by up to 20p, this data perturbation makes it
+                    further unlikely that
+                    anyone could reasonably identify the purchase record in order to retrieve the additional (very
+                    minimal) data.</li>
+
+            </ul>
+
+            <h4 class="h5">Would it be possible to identify what other purchases the individual made?</h4>
+            <p class="fw-semibold">No.</p>
+            <ul>
+                <li>There is no relationship between a purchase and other purchases made by the same individual.
+                </li>
+            </ul>
+
+            <h4 class="h5">Would it be possible to identify how much the individual spent overall or in other weeks?
+            </h4>
+            <p class="fw-semibold">Reasonably unlikely.</p>
+            <ul>
+                <li>The total purchases made within a week are summed (data generalisation) without the store
+                    information but with the postcode outcode.</li>
+                <li>This breaks a potentially known interaction with a single store and
+                    should introduce a wider subset of potential data subjects.</li>
+                <li>As the amounts are summed, it would be necessary to know all the purchases for a whole week and
+                    not just a single purchase event.</li>
+                <li>The amounts spent are offset by up to 20p, this data perturbation means that, even if only one
+                    purchase was made in a week,
+                    it is unlikely someone could reasonably, and with confidence, identify the weekly records made
+                    by an individual</li>
+            </ul>
+
+            <h4 class="h5">If I submitted a subsequent (or earlier) version of the JSON data for the same Clubcard,
+                would that give me a key to
+                identify information from a previous submission?</h4>
+            <p class="fw-semibold">No.</p>
+            <ul>
+                <li>Any identifiers that are generated (hashed) from the data itself are for single records - so a
+                    product or a purchase. This makes it possible to
+                    identify that the data submitted is a duplicate, but there is no relationship between those
+                    records and others.
+                </li>
+                <li>For the weekly data, which does retain a relationship between records, the identifier is
+                    randomly generated per submission, so if
+                    the data was submitted again another identifier would be generated and it would not be possible
+                    to relate these records to the previously
+                    submitted records.</li>
+            </ul>
+
+        </div>
+    </div>
+</div>

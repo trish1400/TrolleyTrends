@@ -1,0 +1,89 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+
+            <p>There are some peculiarities with the examples of Tesco Clubcard data I have seen so far. I have tried
+                to do some appropriate data cleansing, however, as I have only had a few datasets to test with there are
+                likely to
+                be oddities that I have not yet seen.</p>
+
+            <p>The analysis and data visualisations can only be as good as the source data. I've made best endeavours to
+                interpret it in a way I believe to be reasonably accurate but it is provided 'as is' without warranty or
+                liability.
+                You can validate any calculations by referring to your source data in the JSON file.</p>
+
+            <h3>Known Limitations</h3>
+            <ul>
+                <li>Broadly, the Tesco Clubcard data consists of 'Purchases' which is a transaction that occurred on a
+                    specific date at a specific store (or was a delivery). Each Purchase contains the products that were
+                    purchased.  There is a separate collection in the data relating to 'orders' which appear to be Deliveries and
+                    include delivery costs but it is not easy to directly relate these back to purchases, therefore,
+                    'orders' have been ignored.</li>
+
+                <li>The purchase has a 'basketValueNet' that appears to match the amount paid, therefore this has been
+                    used for the majority of calculations. If the payment was partly paid by voucher, this has not been
+                    taken into account.</li>
+
+                <li>There is a total amount of 'overallBasketSavings' per purchase. In older transactions this appears
+                    to be the difference between 'basketValueNet' and 'basketValueGross', however in more recent
+                    transactions that relationship has been broken, therefore 'basketValueGross' is always ignored.</li>
+
+                <li>For older purchases, the price per item appears to be the price before any savings. In these
+                    records, the product prices multiplied by the quantities would sum up to the 'basketValueGross', if
+                    the 'overallBasketSavings' was then deducted, that would equal the 'basketValueNet' which always
+                    appeared to match the payment. However, in newer records this relationship has also been lost with
+                    the product prices multiplied by the quantities also adds up to the 'basketValueGross', implying
+                    that the saving is now included in the product price provided. Therefore it should be noted that
+                    there may be some inaccurate item prices.</li>
+
+                <li>Some items appear to be administrative, such as an item to attribute ClubCard points for using your
+                    own bags, therefore every item with a price of '0.0' has been excluded.</li>
+
+                <li>Some items relate to delivery costs, however, not every delivery order has a delivery item. These
+                    have not been excluded from the data but the sum of them may not equal the total amount spent on
+                    delivery.</li>
+
+                <li>While the product 'price' generally seems to be the price per item, there were a handful of examples
+                    in my own data where it appeared to be the total price for the quantity purchased. These were quite
+                    old purchases and so that has been ignored with the assumption that, for products sold per item, it
+                    is always the price for a single item.</li>
+
+                <li>For items that are sold by weight, such as 'Tesco Bananas Loose', the price appears to be the price
+                    per 100g, in older purchases a 'weightInGrams' figure was given, that would enable the actual cost
+                    incurred to be calculated, however, the weight is not included in more recent purchases. Similarly,
+                    there is a 'volumeInLitres' value that appears to only have been populated for motor fuel purchases
+                    and is no longer populated. For some of these items, the quantity was given as null, so they have
+                    been attributed a quantity of 1. The price given is assumed to be the price per 100g or per litre.
+                </li>
+
+                <li>Store names have changed in the dataset over time, for consistency, the stores are grouped on Store
+                    ID and the most recent name (which is generally formatted in lowercase and is used for all
+                    purchases). There is a 'Purchase Type' field, that seems to differentiate between 'in store',
+                    'delivery' and (historically) 'Tesco Direct', however, there may be other values, such as 'Click and
+                    Collect' for which I have yet to see example data.</li>
+
+                <li>In more recent purchases, the store name for delivery orders, has been set to a generic value such
+                    as 'Grocery England', although the 'store ID' still relates to the shop which picked the order. To
+                    minimise anomalies caused by this inconsistency, all purchases with purchaseType of 'ghs' (is a
+                    delivery order) have been attributed to a generic delivery store called 'Home Delivery'.</li>
+
+                <li>Some products are listed with a negative quantity, these are presumably products that were ordered
+                    but were not delivered, these have been left in the data to give accurate product totals. There were
+                    some products with a negative quantity and a negative price, these might have been 'scan as you
+                    shop' items that were subsequently removed, however, if that is the case, that doesn't appear to
+                    have been applied consistently. These items have had the price made absolute but the quantity
+                    remains negative.</li>
+
+                <li>Some datasets had entire purchases with negative totals, these may have been returns and have been
+                    left in the data.</li>
+
+                <li>There are products listed as 'Home Delivery Substitution Refund' presumably, this is the difference
+                    between the product ordered and the product supplied, but there is also inconsistency with the
+                    application of this information (for example the price appears to be a misnomer, e.g. '1000'). As
+                    the actual product received is unknown, this information isn't thought to be particularly helpful
+                    and these have therefore been excluded.</li>
+            </ul>
+
+        </div>
+    </div>
+</div>

@@ -1,0 +1,849 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+	<title>Trolley Trends</title>
+
+	<!-- Required meta tags -->
+	<meta charset="utf-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1">
+
+	<!-- CoreUI for Bootstrap CSS -->
+	<link href="https://cdn.jsdelivr.net/npm/@coreui/coreui@4.3.2/dist/css/coreui.min.css" rel="stylesheet">
+	<link href="https://cdn.jsdelivr.net/npm/@coreui/icons@3.0.1/css/all.min.css" rel="stylesheet">
+
+
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"
+		integrity="sha512-A7AYk1fGKX6S2SsHywmPkrnzTZHrgiVT7GcQkLGDe2ev0aWb8zejytzS8wjo7PGEXKqJOrjQ4oORtnimIRZBtw=="
+		crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css"
+		integrity="sha512-1cK78a1o+ht2JcaW6g8OXYwqpev9+6GqOkz9xmBN9iUUhIndKtxwILGWYOSibOKjLsEdjyjZvYDq/cZwNeak0w=="
+		crossorigin="anonymous" referrerpolicy="no-referrer" />
+
+
+	<!-- Chart.js -->
+	<script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.0/dist/chart.min.js"></script>
+	<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
+
+
+	<!-- Custom -->	
+	<link href="css/style.css" rel="stylesheet">
+	<script src="js/helpers.js"></script>
+	<script src="js/charts.js"></script>
+	<script src="js/display.js"></script>
+	<script src="js/postTescoAnon.js"></script>
+
+	<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
+	<link rel="manifest" href="images/site.webmanifest">
+
+</head>
+
+<body>
+	<div class="wrapper d-flex flex-column min-vh-100 bg-light">
+		<header class="header mb-4 py-0 px-sm-4 px-1 shadow-sm">
+			<h1 class="h3"><img src="images/header.png" alt="Trolley Trends"></h1>
+		</header>
+
+		<main class="flex-grow-1">
+			<div class="container" id="uploadJson">
+
+				<div class="row mb-4">
+					<div class="col">
+						<div class="card fs-3">
+							<div class="card-header fw-bold">Supermarket Loyalty Card Data Visualiser</div>
+							<div class="card-body">
+								<p>Currently, this visualiser only works for Tesco Clubcard data. To use it, you will need to get your data by submitting a <a
+									href="https://www.tesco.com/account/data-portability/en-GB" rel="noopener">Tesco Data
+									Request</a>.</p>
+								<div class="alert alert-info" id="useAirplaneMode" role="alert">This visualiser works
+									entirely in your browser. Your personal data does not leave your device. <span
+										class="fw-bold">Not convinced? Enable Airplane Mode.</span>
+								</div>
+
+								<div class="alert alert-danger" id="errorFile" style="display:none" role="alert">The
+									file you uploaded was not in the format expected. Please try again</div>
+
+								<div class="mb-3">
+									<label for="fileInput" class="form-label">Select your 'Tesco-Customer-Data.json'
+										file</label>
+									<input class="form-control form-control-lg" id="fileInput" type="file"
+										accept=".json">
+								</div>
+							</div>
+							<div class="card-footer">
+								<div class="row">
+									<div class="col">
+										<div class="text-body-secondary text-right fs-5">There are some 
+											<button type="button" class="btn btn-lg btn-link p-0"
+											data-coreui-toggle="modal" data-coreui-target="#myModal" 
+											data-coreui-content="modal-tescoData.html" 
+											data-coreui-title="About Tesco Clubcard data">known limitations</button> 
+											with the Clubcard data. The analysis and data visualisations can only be as good as the source data. 
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+
+
+			<div class="container justify-content-center" id="spinner" style="display:none;" >
+				<div class="row">
+					<div class="col text-center">
+						<img src="images/android-chrome-192x192.png" id="spinnerTrolley" alt="loading..." role="status"/>
+					</div>
+				</div>
+			</div>
+			
+			
+
+
+			<div class="container-fluid" id="yourData" style="display:none">
+
+				<!-- Start scrolling -->
+				<div class="row mb-5 text-center text-dark">
+					<div class="col">
+						<div class="fs-3">
+							<p class="display-3 mb-5" data-aos="fade-in" data-aos-anchor-placement="center-center">To discover your Trolley Trends</p>
+							<p class="display-1 mb-5 text-primary" data-aos="fade-in" data-aos-anchor-placement="center-center">scroll down</p>
+							<p class="display-1 downicon text-primary" data-aos="fade-down" data-aos-anchor-placement="center-center"
+								data-aos-delay="400">					
+								<svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={1.5} stroke="currentColor">
+									<path strokeLinecap="round" strokeLinejoin="round" d="m4.5 5.25 7.5 7.5 7.5-7.5m-15 6 7.5 7.5 7.5-7.5" />
+								  </svg>
+							</p>
+
+						</div>
+					</div>
+				</div>
+
+				<!-- Dates Covered -->
+				<div class="row mb-5 constrainedSection" data-aos="fade-up" data-aos-anchor-placement="center-center">
+					<div class="col">
+						<div class="card fs-3 mb-5">
+							<h2 class="card-header fw-bold">Your Tesco Clubcard data covers purchases between </h2>
+							<div class="card-body">
+								<p class="fs-3"><span id="earliestDate" class="text-secondary fs-1">[start date]</span>
+									and <span id="latestDate" class="text-secondary fs-1">[end date]</span> (inclusive).
+								</p>
+								<p class="fs-3" data-aos="fade-up" data-aos-anchor-placement="center-center"
+									data-aos-delay="400">That's <span id="durationYears"
+										class="text-secondary fs-1">n</span> year(s), <span id="durationMonths"
+										class="text-secondary fs-1">n</span> month(s), and <span id="durationDays"
+										class="text-secondary fs-1">n</span> day(s).</p>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Do you remember why -->
+				<div class="row mb-5 text-center text-dark" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="fs-3 mb-5">
+							<p class="display-3">Remember these dates!</p>
+							<p class="display-3">The following statistics all relate to this period.</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Transactions -->
+				<div class="row mb-5 constrainedSection" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="card fs-3 mb-5">
+							<h2 class="card-header fw-bold">You shopped with your Clubcard </h2>
+							<div class="card-body">
+								<div class="fs-3" data-aos="fade-left" data-aos-anchor-placement="top-center"
+									data-aos-delay="400"><span class="fs-1 text-info fw-semibold"
+										id="totalTransactions">Transactions</span> times</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Average shopping frequency -->
+				<div class="row mb-5 constrainedSection" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="card fs-3 mb-5">
+							<h2 class="card-header fw-bold">On average (mean), you shop every</h2>
+							<div class="card-body">
+								<div data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
+									<span id="frequency" class="fs-1 text-warning fw-semibold">Av days</span> days
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Longest between shops -->
+				<div class="row mb-5 constrainedSection" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="card fs-3">
+							<h2 class="card-header fw-bold">The longest you went between shops was </h2>
+							<div class="card-body">
+								<div data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
+									<span id="longestGapDays" class="fs-1 text-success fw-semibold">days</span> days,
+									between <span id="longestGapStart" class="fs-1 text-success fw-semibold">date</span>
+									and
+									<span id="longestGapEnd" class="fs-1 text-success fw-semibold">date</span>.
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+				<!-- Do you remember why -->
+				<div class="row mb-5 text-center text-dark" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="fs-3 mb-5">
+							<p class="display-3">Was it a holiday? A pandemic? </p>
+						</div>
+					</div>
+				</div>
+
+
+
+				<!-- Stores visited -->
+				<div class="row mb-5 constrainedSection" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="card fs-3 mb-5">
+							<h2 class="card-header fw-bold">You visited or have ordered from </h2>
+							<div class="card-body">
+								<div data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
+									<span id="InstoresCounts" class="fs-1 text-danger fw-semibold">count</span> store(s)
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- What stores they are? -->
+				<div class="row mb-5 text-center text-dark" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="fs-3 mb-5">
+							<p class="display-3">Do you remember what stores they were?</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Chart for Stores -->
+				<div class="row mb-5 constrainedSection" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col-md-12 mb-4 d-flex">
+						<div class="card mb-5 fs-3 d-flex flex-column">
+							<h2 class="card-header fw-bold">The stores you have used</h2>
+							<div class="card-body d-flex flex-column">
+								<canvas id="storesVisitedChart"></canvas>
+								<div id="storesVisitedChartLegend"
+									class="mt-auto border-top pt-2 d-flex flex-wrap align-items-center justify-content-start">
+								</div>
+							</div>
+							<div class="card-footer">
+								<div class="row">
+									<div class="col">
+										<div class="text-body-secondary text-right fs-5">The inner doughnut shows the
+											stores you shopped at proportional to the number of purchases you made.
+											The outer doughnut shows the stores you shopped at proportional to the amount you spent.
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- what days-->
+				<div class="row mb-5 text-center text-dark" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="fs-3 mb-5">
+							<p class="display-3">What day of the week do you shop most often?</p>
+							<p class="display-3">When do you spend the most?</p>
+						</div>
+					</div>
+				</div>
+
+
+				<!-- Chart for Days of the Week -->
+				<div class="row mb-5 constrainedSection" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col-md-12 mb-4 d-flex">
+						<div class="card mb-5 fs-3 w-100 d-flex flex-column">
+							<h2 class="card-header fw-bold">You shopped on these days of the week</h2>
+							<div class="card-body">
+								<div class="row" id="daysOfTheWeek"></div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+				<!-- Most expensive -->
+				<div class="row mb-5 constrainedSection" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="card mb-5 fs-3">
+							<h2 class="card-header fw-bold">Your most expensive shop was </h2>
+							<div class="card-body">
+								<div data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
+
+									<p><span class="fs-1 text-primary fw-semibold" id="expensiveShopAmount">Most
+										spent</span> on <span id="expensiveShopDate" class="fs-1 text-primary fw-semibold">date</span> at</p>
+									<p><span class="fs-1 text-primary fw-semibold" id="expensiveShopStore">store</span></p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Biggest Shop -->
+				<div class="row mb-5 constrainedSection" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="card fs-3">
+							<h2 class="card-header fw-bold">Your biggest shop consisted of </h2>
+							<div class="card-body">
+								<div data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
+
+									<p><span class="fs-1 text-secondary fw-semibold" id="biggestShopItems">Items </span>
+									items on <span id="biggestShopDate" class="fs-1 text-secondary fw-semibold">date</span> at</p>
+									<p>
+									<span class="fs-1 text-secondary fw-semibold" id="biggestShopStore">store</span></p>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Do you remember why? -->
+				<div class="row mb-5 text-center text-dark" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="fs-3 mb-5">
+							<p class="display-3">Do you remember what it was for?</p>
+						</div>
+					</div>
+				</div>
+
+
+				<!-- Purchases Chart -->
+				<div class="row mb-5" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="card fs-3">
+							<h2 class="card-header fw-bold">
+								All your shops
+							</h2>
+							<div class="card-body">
+								<canvas id="purchasesScatterChart"></canvas>
+								<div id="scatterChartLegend"
+									class="border-top mt-2 pt-2 d-flex flex-wrap align-items-center justify-content-start">
+								</div>
+							</div>
+							<div class="card-footer">
+								<div class="row">
+									<div class="col">
+										<div class="text-body-secondary text-right fs-5">Click or hover on a dot to see
+											how much you spent, where it was and how many items you bought. </div>
+										<div class="text-body-secondary text-right fs-5">Click a store in the legend to
+											remove it from the chart.</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- What patterns ? -->
+				<div class="row mb-5 text-center text-dark" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="fs-3">
+							<p class="display-3">What patterns and trends can you see?</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Are you ready ? -->
+				<div class="row text-center text-dark" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="fs-3">
+							<p class="display-3">Are you ready for how much you spent?</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Brace yourself ? -->
+				<div class="row mb-5 text-center text-primary" data-aos="fade-up"
+					data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="fs-3">
+							<p class="display-3">Brace yourself!</p>
+						</div>
+					</div>
+				</div>
+
+
+				<!-- Total spent -->
+				<div class="row mb-5 constrainedSection" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="card fs-3 mb-5">
+							<h2 class="card-header fw-bold">In total, you have spent</h2>
+							<div class="card-body">
+								<div class="fs-1 text-danger fw-semibold" id="totalSpent" data-aos="fade-left"
+									data-aos-anchor-placement="top-center" data-aos-delay="400">Spent</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- Total saved -->
+				<div class="row mb-5 constrainedSection" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="card fs-3 mb-5">
+							<h2 class="card-header fw-bold">But you have also saved</h2>
+							<div class="card-body">
+								<div class="fs-1 text-success fw-semibold" id="totalSaved" data-aos="fade-left"
+									data-aos-anchor-placement="top-center" data-aos-delay="400">Saved</div>
+							</div>
+							<div class="card-footer">
+								<div class="row">
+									<div class="col">
+										<div class="text-body-secondary text-right fs-5">This is the sum of what Tesco calls your 'overallBasketSavings'.
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+				<!-- Average spend -->
+				<div class="row mb-5 constrainedSection" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="card fs-3">
+							<h2 class="card-header fw-bold">On average (mean), you spend </h2>
+							<div class="card-body">
+								<div data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
+									<span id="averageSpend" class="fs-1 text-warning fw-semibold">Av spend</span> per
+									shop or <span id="averageWeeklySpend" class="fs-1 text-warning fw-semibold">Av
+										week</span> per week.
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- what you thought ? -->
+				<div class="row mb-5 text-center text-dark" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="fs-3 mb-5">
+							<p class="display-3">Is that what you expected?</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Weekly Chart -->
+				<div class="row mb-5" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="card fs-3" id="weeklyBarChartCard">
+							<h2 class="card-header fw-bold d-flex justify-content-between align-items-center">
+								<span>How much you've spent each week</span>
+							</h2>
+							<div class="card-body">
+								<canvas id="weeklyBarChart"></canvas>
+								<div id="weeklyBarChartLegend"
+									class="border-top mt-2 pt-2 d-flex flex-wrap align-items-center justify-content-start">
+								</div>
+							</div>
+							<div class="card-footer">
+								<div class="row">
+									<div class="col">
+										<div class="text-body-secondary text-right fs-5">Each bar shows the total per
+											week, stacked by store type. Hover or click on a bar to see the amount spent
+											that week.</div>
+										<div class="text-body-secondary text-right fs-5">Click a store type in the
+											legend to exclude it from the chart.</div>
+										<div class="text-body-secondary text-right fs-5">View the rolling 4 week average
+											to see if there is a trend.</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- what trends can you see ? -->
+				<div class="row mb-5 text-center text-dark" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="fs-3 mb-5">
+							<p class="display-3">What trends can you see?</p>
+							<p class="display-3">Can you spot your lifestyle changes or the increases in cost of living?
+							</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Total items purchased -->
+				<div class="row mb-5 constrainedSection" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="card fs-3 mb-5">
+							<h2 class="card-header fw-bold">You have purchased</h2>
+							<div class="card-body">
+								<div data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
+									<span id="totalItems" class="fs-1 text-primary fw-semibold">Items</span> items,
+									comprising of
+									<span id="totalProducts" class="fs-1 text-primary fw-semibold">Products</span>
+									different products
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+				<!-- Average items per shop -->
+				<div class="row mb-5 constrainedSection" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="card fs-3 mb-5">
+							<h2 class="card-header fw-bold">On average (mean), you purchase </h2>
+							<div class="card-body">
+								<div data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
+									<span id="averageItems" class="fs-1 text-secondary fw-semibold">Av items</span>
+									items
+									per shop
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- what do you buy? -->
+				<div class="row mb-5 text-center text-dark" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="fs-3 mb-5">
+							<p class="display-3">What do you think you buy?</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Top Products by Quantity -->
+				<div class="row mb-5 constrainedSection" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="card">
+							<h2 class="card-header fs-3 fw-bold">The products you have bought the most of</h2>
+							<div class="card-body">
+								<div class="mb-3">
+									<div class="row">
+										<div class="col-12 d-flex justify-content-end flex-wrap">
+											<div class="d-flex align-items-center mb-2 mb-md-0">
+												<label for="topQuantityProductsNumRecordsDropdown"
+													class="me-2">Show:</label>
+												<select class="form-select" id="topQuantityProductsNumRecordsDropdown">
+													<option value="3">3</option>
+													<option value="10">10</option>
+													<option value="25">50</option>
+													<option value="100">100</option>
+												</select>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div id="topQuanitityProductsTable"></div>
+							</div>
+							<div class="card-footer">
+								<div class="row">
+									<div class="col">
+										<div class="text-body-secondary text-right fs-5">The chart shows the price
+											fluctuations, if there are any. Hover or click to see the price you paid on
+											a given date.</div>
+										<div class="text-body-secondary text-right fs-5">You can change the number of
+											items shown, but change it back or you'll have to scroll a lot.</div>
+										<div class="small text-body-secondary text-uppercase text-right">N.B. For items
+											sold by weight the price is for 100g
+											and motor fuel is per litre.</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- not surprised? -->
+				<div class="row mb-5 text-center text-dark" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="fs-3 mb-5">
+							<p class="display-3">I bet you're not surprised!</p>
+						</div>
+					</div>
+				</div>
+
+				<!-- Top Products by Price  -->
+				<div class="row mb-4 constrainedSection" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="card">
+							<h2 class="card-header fs-3 fw-bold">The most expensive products you have bought</h2>
+							<div class="card-body">
+								<div class="mb-3">
+									<div class="row">
+										<div class="col-12 d-flex justify-content-end flex-wrap">
+											<div class="d-flex align-items-center mb-2 mb-md-0">
+												<label for="topPriceProductsNumRecordsDropdown"
+													class="me-2">Show:</label>
+												<select class="form-select" id="topPriceProductsNumRecordsDropdown">
+													<option value="3">3</option>
+													<option value="10">10</option>
+													<option value="25">50</option>
+													<option value="100">100</option>
+												</select>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div id="topPriceProductsTable"></div>
+							</div>
+							<div class="card-footer">
+								<div class="row">
+									<div class="col">
+										<div class="text-body-secondary text-right fs-5">The chart shows the price
+											fluctuations, if there are any, hover or click to see the price you paid on
+											a given date.</div>
+										<div class="text-body-secondary text-right fs-5">You can change the number of
+											items shown, but change it back or you'll have to scroll a lot.</div>
+										<div class="small text-body-secondary text-uppercase text-right">N.B. For items
+											sold by weight the price is for 100g
+											and motor fuel is per litre.</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+				<!-- Top Products by Total Spend -->
+				<div class="row mb-4 constrainedSection" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="card">
+							<h2 class="card-header fs-3 fw-bold">The products that you have spent the most on</h2>
+							<div class="card-body">
+								<div class="mb-3">
+									<div class="row">
+										<div class="col-12 d-flex justify-content-end flex-wrap">
+											<div class="d-flex align-items-center mb-2 mb-md-0">
+												<label for="totalSpendProductsNumRecordsDropdown"
+													class="me-2">Show:</label>
+												<select class="form-select" id="totalSpendProductsNumRecordsDropdown">
+													<option value="3">3</option>
+													<option value="10">10</option>
+													<option value="25">50</option>
+													<option value="100">100</option>
+												</select>
+											</div>
+										</div>
+									</div>
+								</div>
+								<div id="topSpendProductsTable"></div>
+							</div>
+							<div class="card-footer">
+								<div class="row">
+									<div class="col">
+										<div class="text-body-secondary text-right fs-5">The chart shows the price
+											fluctuations, if there are any, hover or click to see the price you paid on
+											a given date.</div>
+										<div class="text-body-secondary text-right fs-5">You can change the number of
+											items shown, but change it back or you'll have to scroll a lot.</div>
+										<div class="small text-body-secondary text-uppercase text-right">N.B. For items
+											sold by weight the price is for 100g
+											and motor fuel is per litre.</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+
+				<!-- bet not surprised? -->
+				<div class="row mb-5 text-center text-dark" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="fs-3 mb-5">
+							<p class="display-3">I doubt you're surprised by these either!</p>
+						</div>
+					</div>
+				</div>
+
+
+				<!-- Found that interesting? -->
+				<div class="row mb-5 text-center text-secondary" data-aos="fade-up"
+					data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="fs-3 mb-5">
+							<p class="display-3">That's it! I hope you found that interesting.</p>
+						</div>
+					</div>
+				</div>
+
+			</div>
+
+			<div class="container" id="submitData" style="display:none">
+
+
+				<!-- Download CSVs? -->
+				<div class="row mb-5" data-aos="fade-up" data-aos-anchor-placement="top-center">
+					<div class="col">
+						<div class="card fs-3 mb-5">
+							<h2 class="card-header fw-bold">Do you want to explore your data yourself in a spreadsheet?
+							</h2>
+							<div class="card-body">
+								<div class="mb-3">
+									<p>Here are CSV files containing your 'raw' data almost as it is supplied in the
+										Tesco file, without data clensing.
+									</p>
+									<p>The purchases file contains the transactions you made
+										and the products file contains the items you purchased, plus some information
+										from the related purchase record.
+									</p>
+									<p>The products data should enable you to view exactly what you bought in any purchase.  If you are using Excel, I suggest starting with the products file and analysing it in a PivotTable.
+									</p>
+								</div>
+								<div class="mb-3">
+									<div class="col-12 d-flex justify-content-end flex-wrap">
+										<div class="d-flex align-items-center mb-2 mb-md-0">
+											<button type="button" id="downloadPurchases" class="btn btn-info fs-3"
+												onclick="downloadCSV('rawPurchases.csv')">Download purchases
+												data</button>
+										</div>
+										<div class="d-flex align-items-center ps-3 mb-2 mb-md-0">
+											<button type="button" id="downloadProducts" class="btn btn-info fs-3"
+												onclick="downloadCSV('rawProducts.csv')">Download products
+												data</button>
+										</div>
+									</div>
+
+								</div>
+
+							</div>
+						</div>
+					</div>
+				</div>
+
+
+				<!-- Now I'd like a favour? -->
+				<div class="row mb-5 text-center text-primary" data-aos="fade-up" data-aos-anchor-placement="top-bottom">
+					<div class="col">
+						<div class="fs-3 mb-5">
+							<p class="display-3">Please could you do me a favour?</p>
+						</div>
+					</div>
+				</div>
+
+
+				<!-- Contribute-->
+				<div class="row mb-4" data-aos="fade-up" data-aos-anchor-placement="top-bottom">
+					<div class="col">
+						<div class="card fs-3">
+							<h2 class="card-header fw-bold">Will you contribute your anonymised data?</h2>
+							<div class="card-body">
+								<div class="mb-3">
+									<p>This would contribute to a dataset that could help observe the Cost of Living
+										crisis and assist in the development of further analysis tools.</p>
+										<div class="alert alert-info" role="alert">If you enabled Airplane Mode, you will need to disable it in order to contribute.</div>
+										<p class="text-secondary fs-1">No personal data is collected.</p>
+										<p>The data is <span class="fw-semibold">anonymised</span>, not merely <span
+												class="fw-semibold">pseudo-anonymised</span>.</p>
+									</div>
+								<div class="mb-3">
+									<div class="row">
+										<!-- Use the flex utilities to align buttons to the left on md screens and above -->
+										<div class="col-12 col-md d-flex justify-content-start flex-wrap">
+											<button type="button" class="btn btn-light btn-lg fs-3" 
+											data-coreui-toggle="modal" data-coreui-target="#myModal" 
+											data-coreui-title="The data you are being asked to contribute"
+											data-coreui-content="modal-anonData.html"  
+											data-coreui-footer="modal-anonDataDownloads.html">Tell me more</button>
+
+										</div>
+
+										<!-- Push the "Contribute!" button to the right on md screens and above -->
+										<div class="col-12 col-md-auto ms-md-auto text-end">
+											<button type="button" id="contributeData"
+												class="btn btn-primary btn-lg mt-2 mt-md-0 fs-3">Contribute!</button>
+										</div>
+									</div>
+								</div>
+							</div>
+						</div>
+					</div>
+				</div>
+			</div>
+		</main>
+
+
+		<!-- Modal -->
+		<div class="modal fade" id="myModal" tabindex="-1" aria-labelledby="myModalLabel"
+			aria-hidden="true">
+			<div class="modal-dialog modal-dialog-centered modal-dialog-scrollable modal-xl">
+				<div class="modal-content">
+					<div class="modal-header">
+						<h2 class="modal-title" id="myModalLabel">Title goes here</h2>
+						<button type="button" class="btn-close" data-coreui-dismiss="modal"
+							aria-label="Close"></button>
+					</div>
+					<div id="myModalBody" class="modal-body">
+							Content should load in here.
+					</div>
+					<div id="myModalFooter" class="modal-footer">
+						<!-- Use the flex utilities to align buttons to the left on md screens and above -->
+						<span id="myModalFooterButtons">
+						</span>
+						<!-- Push the "Close" button to the right on md screens and above -->
+						<div class="col-12 col-md-auto ms-md-auto text-end">
+							<button type="button" data-coreui-dismiss="modal"
+								class="btn btn-light btn-lg mt-2 mt-md-0">Close</button>
+						</div>
+					</div>
+				</div>
+			</div>
+		</div>
+
+		<!-- Toast -->
+		<div class="toast-container" id="toastContainer" aria-live="polite" aria-atomic="true">
+			<!-- Toasts will be dynamically added here -->
+		  </div>
+				
+
+
+		<!-- Footer -->  
+		<footer class="footer bg-dark text-white py-3 mt-auto">
+			<div class="container">
+				<div class="row">
+					<div class="col-md-6 fs-5">
+						Trish McDonough
+					</div>
+					<div class="col-md-2 text-end">
+						<button type="button" class="btn btn-lg btn-link p-0 text-white"
+						data-coreui-toggle="modal" data-coreui-target="#myModal" 
+						data-coreui-content="modal-about.html" 
+						data-coreui-title="About">About</button>
+					</div>
+					<div class="col-md-2 text-end">
+						<button type="button" class="btn btn-lg btn-link p-0 text-white"
+						data-coreui-toggle="modal" data-coreui-target="#myModal" 
+						data-coreui-content="modal-accessibility.html" 
+						data-coreui-title="Accessibility">Accessibility</button>
+					</div>
+					<div class="col-md-2 text-end">
+						<button type="button" class="btn btn-lg btn-link p-0 text-white"
+						data-coreui-toggle="modal" data-coreui-target="#myModal" 
+						data-coreui-content="modal-privacy.html" 
+						data-coreui-title="Privacy">Privacy</button>
+					</div>
+				</div>
+			</div>
+		</footer>
+	</div>
+
+	<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
+	<script src="js/processData.js"></script>
+
+</body>
+
+</html>

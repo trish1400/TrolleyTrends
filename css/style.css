@@ -1,0 +1,117 @@
+.legend-key
+{
+    width: 2em; 
+    height: 1em; 
+    display: inline-block; 
+    margin-right: 0.4em;
+    border: 1px solid Gainsboro;
+}
+
+.strikethrough {
+    text-decoration: line-through;
+}
+
+.legend-item.clickable{
+    cursor: pointer;
+}
+
+.full-screen {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    z-index: 1050; /* High z-index to ensure it's above other content */
+}
+
+.downicon svg{
+    width: 1.2em;
+}
+
+
+.constrainedSection .card {
+    max-width: 830px; /* Set the maximum width of the card */
+    margin: 0 auto; /* Center the card horizontally */
+}
+
+
+.animateProgress {
+    animation: trolleyAnim 3s ease 0s infinite;
+    transform-origin: bottom right; /* Set the pivot point for rotation */
+}
+
+@keyframes trolleyAnim {
+    0% {
+        opacity: 0;
+        transform: translateX(100%); /* Start off-screen to the right */
+    }
+
+    10% {
+        opacity: 1;
+        transform: translateX(10px) rotate(5deg); /* Slide in and become fully visible */
+    }
+
+    20%, 40%, 60% {
+        transform: translateX(0); /* Central position during bounces */
+    }
+
+    30% {
+        transform: translateX(20px); /* First bounce to the right */
+    }
+
+    50% {
+        transform: translateX(-15px); /* Bounce to the left */
+    }
+
+    70% {
+        transform: translateX(10px) rotate(5deg); /* Final bounce to the right with a slight clockwise rotation */
+    }
+
+    90% {
+        opacity: 1;
+        transform: translateX(0) rotate(5deg); /* Prepare to slide out */
+    }
+
+    100% {
+        opacity: 0;
+        transform: translateX(-100%) rotate(5deg); /* Slide out to the left and fade out */
+    }
+}
+
+
+.btn-link{
+    vertical-align: baseline;
+}
+  
+.text-primary{color: #6610f2 !important;}
+.bg-primary{background-color: #6610f2 !important;}
+
+.text-info {color: #648FFF !important;}
+.bg-info  {background-color: #648FFF !important;}
+
+.text-secondary{color: #DC267F !important;}
+.bg-secondary{background-color: #DC267F !important;}
+
+.text-warning{color: #FE6100 !important;}
+.bg-warning{background-color: #FE6100 !important;}
+
+
+
+/*Toast*/
+.toast-container {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1050; /* Ensure it's above most other elements */
+}
+
+
+.toast {
+    padding-right: 40px; /* Adjust based on the size of the close button */
+}
+
+.toast-container .btn-close {
+    right: 10px; /* Adjust the right position as needed */
+    top: 10px; /* Adjust the top position as needed */
+}
