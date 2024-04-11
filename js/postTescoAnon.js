@@ -1,29 +1,44 @@
 // Define a function to perform a fetch with retry logic
-async function fetchWithRetry(url, options, maxRetries = 3, retryDelay = 1000) {
-
+async function fetchWithRetry(url, data, contentType = 'application/json', maxRetries = 3, retryDelay = 1000) {
   console.log('fetchWithRetry');
 
+  // Setting up the headers for Azure Blob Storage upload
+  const headers = {
+      'x-ms-blob-type': 'BlockBlob',
+      'Content-Type': contentType // Default to 'application/json', can be overridden
+  };
+
+  // Options for the fetch request
+  const options = {
+      method: 'PUT', // Specify PUT method for uploading
+      headers: headers,
+      body: JSON.stringify(data) // Assuming the data needs to be stringified, adjust if necessary
+  };
 
   for (let attempt = 0; attempt < maxRetries; attempt++) {
-    try {
-      const response = await fetch(url, options);
-      if (!response.ok) {
-        throw new Error('Network response was not ok');
+      try {
+          const response = await fetch(url, options);
+          if (!response.ok) {
+              // If the response is not ok, log the status and throw an error
+              console.error(`Server responded with status ${response.status}`);
+              throw new Error('Network response was not ok');
+          }
+          return response; // Successfully fetched within the current attempt
+      } catch (error) {
+          console.error(`Attempt ${attempt + 1} failed:`, error);
+          if (attempt < maxRetries - 1) {
+              // Wait for retryDelay milliseconds before the next attempt
+              await new Promise(resolve => setTimeout(resolve, retryDelay));
+              // Increase the delay for the next attempt
+              retryDelay *= 2;
+          } else {
+              // Rethrow the last error after all attempts have failed
+              throw error;
+          }
       }
-      return response; // Successfully fetched within the current attempt
-    } catch (error) {
-      console.error(`Attempt ${attempt + 1} failed:`, error);
-      if (attempt < maxRetries - 1) {
-        // Wait for retryDelay milliseconds before the next attempt
-        await new Promise(resolve => setTimeout(resolve, retryDelay));
-        // Increase the delay for the next attempt
-        retryDelay *= 2;
-      } else {
-        throw error; // Rethrow the last error after all attempts have failed
-      }
-    }
   }
 }
+
 
 document.addEventListener('DOMContentLoaded', function () {
   const contributeButton = document.getElementById('contributeData');
@@ -60,12 +75,12 @@ document.addEventListener('DOMContentLoaded', function () {
 
         console.log('signedUrls',signedUrls);
 
-        // Use the signed URLs to upload data to Azure Blob Storage
-        await Promise.all([
-            fetchWithRetry(signedUrls[0], { method: 'PUT', body: JSON.stringify(tescoPurchases) }),
-            fetchWithRetry(signedUrls[1], { method: 'PUT', body: JSON.stringify(tescoWeeklyPurchases) }),
-            fetchWithRetry(signedUrls[2], { method: 'PUT', body: JSON.stringify(tescoProducts) })
-        ]);
+      // Use the signed URLs to upload data to Azure Blob Storage
+      await Promise.all([
+        fetchWithRetry(signedUrls[0], tescoPurchases),
+        fetchWithRetry(signedUrls[1], tescoWeeklyPurchases),
+        fetchWithRetry(signedUrls[2], tescoProducts)
+      ]);
 
         console.log('All data uploaded successfully');
 
