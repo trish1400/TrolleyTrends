@@ -1,6 +1,5 @@
 // Define a function to perform a fetch with retry logic
 async function fetchWithRetry(url, data, contentType = 'application/json', maxRetries = 3, retryDelay = 1000) {
-  console.log('fetchWithRetry');
 
   // Setting up the headers for Azure Blob Storage upload
   const headers = {
@@ -61,10 +60,6 @@ document.addEventListener('DOMContentLoaded', function () {
         const tescoWeeklyPurchases = getAnonPurchasesByWeek(); // Synchronous, no need to await
         const tescoProducts = await getAnonProductsData();
 
-        console.log('blobPurchases',JSON.stringify(tescoPurchases));
-        console.log('blobWeeklyPurchases',JSON.stringify(tescoWeeklyPurchases));
-        console.log('blobProducts',JSON.stringify(tescoProducts));
-
 
         // Fetch the signed URL from your Cloudflare Function for each dataset
         const signedUrls = await Promise.all([
@@ -72,8 +67,6 @@ document.addEventListener('DOMContentLoaded', function () {
             fetchSignedUrl('tescoWeeklyPurchases-' + new Date().toISOString()),
             fetchSignedUrl('tescoProducts-' + new Date().toISOString())
         ]);
-
-        console.log('signedUrls',signedUrls);
 
       // Use the signed URLs to upload data to Azure Blob Storage
       await Promise.all([
