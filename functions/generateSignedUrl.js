@@ -2,7 +2,7 @@ export async function onRequestGet(context) {
 
   //const { STORAGE_ACCOUNT, CONTAINER_NAME, SAS_TOKEN } = context.env;
   //console.log('basic', STORAGE_ACCOUNT, CONTAINER_NAME, SAS_TOKEN); // For debugging
-  //console.log('with context.env', context.env.STORAGE_ACCOUNT, context.env.CONTAINER_NAME, context.env.SAS_TOKEN); // For debugging
+  console.log('with context.env', context.env.STORAGE_ACCOUNT, context.env.CONTAINER_NAME, context.env.SAS_TOKEN); // For debugging
   //console.log('Environment Variables:', context.env);
 
   console.log('here I am');

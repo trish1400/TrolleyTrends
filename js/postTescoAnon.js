@@ -84,12 +84,25 @@ document.addEventListener('DOMContentLoaded', function () {
 
 });
 
-// Helper function to fetch a signed URL from your Cloudflare Function
 async function fetchSignedUrl(blobName) {
-  const response = await fetch(`/generateSignedUrl?blobName=${encodeURIComponent(blobName)}`);
+    const response = await fetch(`/generateSignedUrl?blobName=${encodeURIComponent(blobName)}`, {
+      headers: { 'Accept': 'application/json' }
+  });
   if (!response.ok) {
-      throw new Error('Failed to fetch signed URL');
+      // You might want to log or examine the response text for more insight
+      throw new Error(`Failed to fetch signed URL: ${response.statusText}`);
   }
-  const { signedUrl } = await response.json();
-  return signedUrl;
+  try {
+      const { signedUrl } = await response.json();
+      if (signedUrl) {
+          return signedUrl;
+      } else {
+          throw new Error('Signed URL was not provided in the response.');
+      }
+  } catch (error) {
+      // This could catch JSON parsing errors or if the response doesn't include a signedUrl field
+      console.error('Error processing response:', error);
+      throw new Error('Failed to process the response.');
+  }
 }
+
