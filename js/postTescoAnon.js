@@ -55,7 +55,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Change button to loading state
     contributeButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Submitting...';
     contributeButton.disabled = true;
-
+ 
     try {
         const tescoPurchases = await getAnonPurchasesData();
         const tescoWeeklyPurchases = getAnonPurchasesByWeek(); // Synchronous, no need to await
