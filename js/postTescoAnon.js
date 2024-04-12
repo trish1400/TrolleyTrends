@@ -48,42 +48,44 @@ document.addEventListener('DOMContentLoaded', function () {
   });
 
   async function handleButtonClick() {
-    const contributeButton = document.getElementById('contributeData');
-    const buttonContainer = contributeButton.parentElement;
-
     // Change button to loading state
     contributeButton.innerHTML = '<span class="spinner-border spinner-border-sm" role="status" aria-hidden="true"></span> Submitting...';
     contributeButton.disabled = true;
- 
+
     try {
         const tescoPurchases = await getAnonPurchasesData();
         const tescoWeeklyPurchases = getAnonPurchasesByWeek(); // Synchronous, no need to await
         const tescoProducts = await getAnonProductsData();
 
+        // Split tescoProducts into chunks of no more than 10,000 rows
+        const tescoProductsChunks = splitIntoChunks(tescoProducts, 10000);
+        const tescoProductsUploads = tescoProductsChunks.map((chunk, index) => {
+            const chunkBlobName = `tescoProducts-${new Date().toISOString()}-${index}`;
+            return fetchSignedUrl(chunkBlobName).then(signedUrl => 
+                fetchWithRetry(signedUrl, chunk)
+            );
+        });
 
-        // Fetch the signed URL from your Cloudflare Function for each dataset
-        const signedUrls = await Promise.all([
+        // Fetch signed URLs for the other datasets
+        const [tescoPurchasesUrl, tescoWeeklyPurchasesUrl] = await Promise.all([
             fetchSignedUrl('tescoPurchases-' + new Date().toISOString()),
-            fetchSignedUrl('tescoWeeklyPurchases-' + new Date().toISOString()),
-            fetchSignedUrl('tescoProducts-' + new Date().toISOString())
+            fetchSignedUrl('tescoWeeklyPurchases-' + new Date().toISOString())
         ]);
 
-      // Use the signed URLs to upload data to Azure Blob Storage
-      await Promise.all([
-        fetchWithRetry(signedUrls[0], tescoPurchases),
-        fetchWithRetry(signedUrls[1], tescoWeeklyPurchases),
-        fetchWithRetry(signedUrls[2], tescoProducts)
-      ]);
+        // Upload the other datasets
+        const otherUploads = [
+            fetchWithRetry(tescoPurchasesUrl, tescoPurchases),
+            fetchWithRetry(tescoWeeklyPurchasesUrl, tescoWeeklyPurchases)
+        ];
+
+        // Await all uploads to complete
+        await Promise.all([...tescoProductsUploads, ...otherUploads]);
 
         console.log('All data uploaded successfully');
-
-        // On success, change to "Thank you" text and show success toast
         buttonContainer.innerHTML = '<div class="fs-3 mt-2 mt-md-0">Thank you!</div>';
         showToast("<p>Data submitted successfully.</p> <p>Thank you so much!</p>", "success");
     } catch (error) {
         console.error('Error:', error);
-
-        // On error, revert button back to initial state and show error toast
         contributeButton.innerHTML = 'Contribute!';
         contributeButton.disabled = false;
         showToast("<p>Oh no! An error occurred.</p><p> If you're willing, please raise an issue on <a href=\"https://github.com/trish1400/TrolleyTrends/issues\" target=\"_blank\" rel=\"noopener\">GitHub</a>.</p><p>Thanks for trying!</p>", "error");
@@ -94,23 +96,20 @@ document.addEventListener('DOMContentLoaded', function () {
 
 async function fetchSignedUrl(blobName) {
     const response = await fetch(`/generateSignedUrl?blobName=${encodeURIComponent(blobName)}`, {
-      headers: { 'Accept': 'application/json' }
-  });
-  if (!response.ok) {
-      // You might want to log or examine the response text for more insight
-      throw new Error(`Failed to fetch signed URL: ${response.statusText}`);
-  }
-  try {
-      const { signedUrl } = await response.json();
-      if (signedUrl) {
-          return signedUrl;
-      } else {
-          throw new Error('Signed URL was not provided in the response.');
-      }
-  } catch (error) {
-      // This could catch JSON parsing errors or if the response doesn't include a signedUrl field
-      console.error('Error processing response:', error);
-      throw new Error('Failed to process the response.');
-  }
+        headers: { 'Accept': 'application/json' }
+    });
+    if (!response.ok) {
+        throw new Error(`Failed to fetch signed URL: ${response.statusText}`);
+    }
+    const { signedUrl } = await response.json();
+    return signedUrl;
 }
 
+function splitIntoChunks(array, chunkSize) {
+    const chunks = [];
+    for (let i = 0; i < array.length; i += chunkSize) {
+        const chunk = array.slice(i, i + chunkSize);
+        chunks.push(chunk);
+    }
+    return chunks;
+}
