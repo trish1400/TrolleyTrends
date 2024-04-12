@@ -86,13 +86,13 @@ function createScatterChart(chartElementId) {
         }
     });
 
-    generateCustomDynamicLegend(myScatterChart, 'scatterChartLegend');
-
+ 
+    generateCustomDynamicLegend(myScatterChart, 'scatterChartLegend', false);
 
 }
 
 
-function generateCustomDynamicLegend(chart, legendContainerId) {
+function generateCustomDynamicLegend(chart, legendContainerId, updateRollingAverage = false) {
     const legendContainer = document.getElementById(legendContainerId);
     legendContainer.innerHTML = ''; // Clear existing legend content
 
@@ -108,21 +108,25 @@ function generateCustomDynamicLegend(chart, legendContainerId) {
             <small>${dataset.label}</small>
         `;
 
+
         // Add click event to toggle dataset visibility
         legendItem.onclick = () => {
             const meta = chart.getDatasetMeta(index);
+
             meta.hidden = !meta.hidden; // Toggle the 'hidden' property
             legendItem.classList.toggle('strikethrough', meta.hidden); // Toggle the strikethrough class based on visibility
+
             chart.update(); // Refresh the chart to reflect changes
+
             // Recalculate and update the rolling average dynamically
-            updateRollingAverage(chart);
+            if(updateRollingAverage == true) {
+                updateRollingAverage(chart);
+            }
         };
 
         legendContainer.appendChild(legendItem); // Append the legend item to the container
     });
 }
-
-
 
 
 
@@ -342,7 +346,7 @@ function createWeeklyChart(weeklyPurchases, chartElementId) {
     // Initial calculation of rolling averages
     updateRollingAverage(myWeeklyChart);
 
-    generateCustomDynamicLegend(myWeeklyChart,'weeklyBarChartLegend');  
+    generateCustomDynamicLegend(myWeeklyChart,'weeklyBarChartLegend', true);  
 
 
 }
