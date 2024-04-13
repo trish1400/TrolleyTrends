@@ -212,7 +212,10 @@ export function drawStoresWithCounts(purchases) {
         });
 
         generateCustomDoughnutLegend(chart, 'storesVisitedChartLegend');
-        chart.update(); //sometimes the chart didn't appear and I could not work out why - this brute forces it.
+        
+        //sometimes the chart didn't appear and I could not work out why - this brute forces it.
+        chart.resize();
+        chart.update(); 
 
     } catch (error) {
         console.error('Error while creating the chart:', error);
@@ -355,6 +358,7 @@ export function createWeeklyChart(weeklyPurchases, chartElementId) {
         }
     });
 
+    myWeeklyChart.resize();
     myWeeklyChart.update(); //sometimes the chart appeared a funny size and I could not work out why - this brute forces it.
 
     // Initial calculation of rolling averages
@@ -408,6 +412,7 @@ function updateRollingAverage(chart) {
         }
     }
 
+    chart.resize();
     chart.update();
 }
 

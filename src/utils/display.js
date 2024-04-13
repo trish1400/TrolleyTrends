@@ -124,6 +124,7 @@ export function displayPurchaseData(purchases) {
     const averageWeeklySpend = calculateAverageSpentPerWeek(earliestDate, latestDate, totalSpent);
     displayData(averageWeeklySpend, 'averageWeeklySpend');
 
+
     // frequency (every x days)
     const purchaseFrequency = getFrequency(earliestDate, latestDate, countTransactions)
     displayData(purchaseFrequency, 'frequency');
@@ -147,15 +148,13 @@ export function displayPurchaseData(purchases) {
     displayData(biggestShop.storeName, 'biggestShopStore');
     displayData(biggestShop.numberOfItems, 'biggestShopItems');
 
-    if (purchases.length > 1) {
 
-        //longestGap
-        const purchaseGaps = getGapBetweenPurchases(purchases);
-        displayData(purchaseGaps.longestDays, 'longestGapDays');
-        displayData(formatPrettyDate(purchaseGaps.longestStartDate), 'longestGapStart');
-        displayData(formatPrettyDate(purchaseGaps.longestEndDate), 'longestGapEnd');
+    //longestGap
+    const purchaseGaps = getGapBetweenPurchases(purchases);
+    displayData(purchaseGaps.longestDays, 'longestGapDays');
+    displayData(formatPrettyDate(purchaseGaps.longestStartDate), 'longestGapStart');
+    displayData(formatPrettyDate(purchaseGaps.longestEndDate), 'longestGapEnd');
 
-    }
 
 
 

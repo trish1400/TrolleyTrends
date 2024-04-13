@@ -8,6 +8,7 @@ export async function handleFileInputChange(event) {
     if (file) {
         try {
             const jsonData = await readFileAsJson(file);
+
             if (validateJsonSchema(jsonData)) {
                 processJsonData(jsonData);
                 displayInProgress();
@@ -27,15 +28,34 @@ export async function handleFileInputChange(event) {
 async function readFileAsJson(file) {
     return new Promise((resolve, reject) => {
         const reader = new FileReader();
-        reader.onload = (e) => resolve(JSON.parse(e.target.result));
-        reader.onerror = (e) => reject(e);
+        reader.onload = (e) => {
+            try {
+                const result = JSON.parse(e.target.result);
+                resolve(result);
+            } catch (parseError) {
+                reject(new Error("Invalid JSON format."));
+            }
+        };
+        reader.onerror = (e) => reject(new Error("File read error."));
         reader.readAsText(file);
     });
 }
 
+// Validation function
+function validateJsonSchema(jsonData) {
+    // Check if 'Purchase' exists and is an array
+    if (Array.isArray(jsonData['Purchase'])) {
+        // Check if the first element of 'Purchase' is also an array (nested structure)
+        return jsonData['Purchase'].every(purchaseArray => Array.isArray(purchaseArray));
+    }
+    return false; // Returns false if 'Purchase' is not an array or does not exist
+}
+
 
 async function processJsonData(jsonData) {
+
     try {
+
         const storeNames = await processStoreNames(jsonData); // Store the returned value
         dataStore.updateData('storeNames', storeNames);
 
@@ -65,13 +85,6 @@ async function processJsonData(jsonData) {
 }
 
 
-
-// Validation function
-function validateJsonSchema(jsonData) {
-    // to be expanded
-	
-	return Array.isArray(jsonData['Purchase']);
-}
 
 
 function processStoreNames(jsonData) {
@@ -618,7 +631,13 @@ export function calculateAverageSpentPerWeek(startDate, endDate, totalSpent) {
     const differenceInMilliseconds = end - start;
 
     // Convert the difference to days and then to weeks
-    const weeks = differenceInMilliseconds / (1000 * 60 * 60 * 24 * 7);
+    let weeks = differenceInMilliseconds / (1000 * 60 * 60 * 24 * 7);
+
+
+    //if there is only one purchase
+    if (weeks == 0){
+        weeks = 1;
+    }
 
     // Calculate the average spent per week
     const averageSpentPerWeek = totalSpent / weeks;
@@ -814,16 +833,16 @@ export function getTimeBetween(startDate, endDate) {
 
 
 export function getGapBetweenPurchases(purchases) {
-    if (purchases.length < 2) {
-        return null; // Need at least two purchases to find a gap
-    }
 
     // Sort purchases by date
     const sortedPurchases = purchases.sort((a, b) => new Date(a.date) - new Date(b.date));
 
+    //defaults in case there is only one purchase
     let maxGap = 0;
-    let gapStart, gapEnd;
+    let gapStart = new Date(sortedPurchases[0].date).setHours(0, 0, 0, 0);
+    let gapEnd = new Date(sortedPurchases[0].date).setHours(0, 0, 0, 0);
     let gaps = []; // Array to store all gaps
+
 
     for (let i = 1; i < sortedPurchases.length; i++) {
         // Use UTC dates to avoid timezone issues

@@ -44,7 +44,7 @@
 								</div>
 
 								<div class="alert alert-danger" id="errorFile" style="display:none" role="alert">The
-									file you uploaded was not in the format expected. Please try again</div>
+									file you selected was not in the format expected. Please try another file.</div>
 
 								<div class="mb-3">
 									<label for="fileInput" class="form-label">Select your 'Tesco-Customer-Data.json'
@@ -137,9 +137,9 @@
 						<div class="card fs-3 mb-5">
 							<h2 class="card-header fw-bold">You shopped with your Clubcard </h2>
 							<div class="card-body">
-								<div class="fs-3" data-aos="fade-left" data-aos-anchor-placement="top-center"
+								<span class="fs-3" data-aos="fade-left" data-aos-anchor-placement="top-center"
 									data-aos-delay="400"><span class="fs-1 text-info fw-semibold"
-										id="totalTransactions">Transactions</span> times</div>
+										id="totalTransactions">Transactions</span> times</span>
 							</div>
 						</div>
 					</div>
@@ -151,9 +151,9 @@
 						<div class="card fs-3 mb-5">
 							<h2 class="card-header fw-bold">On average (mean), you shop every</h2>
 							<div class="card-body">
-								<div data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
+								<span data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
 									<span id="frequency" class="fs-1 text-warning fw-semibold">Av days</span> days
-								</div>
+								</span>
 							</div>
 						</div>
 					</div>
@@ -165,12 +165,12 @@
 						<div class="card fs-3">
 							<h2 class="card-header fw-bold">The longest you went between shops was </h2>
 							<div class="card-body">
-								<div data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
+								<span data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
 									<span id="longestGapDays" class="fs-1 text-success fw-semibold">days</span> days,
 									between <span id="longestGapStart" class="fs-1 text-success fw-semibold">date</span>
 									and
 									<span id="longestGapEnd" class="fs-1 text-success fw-semibold">date</span>.
-								</div>
+								</span>
 							</div>
 						</div>
 					</div>
@@ -194,9 +194,9 @@
 						<div class="card fs-3 mb-5">
 							<h2 class="card-header fw-bold">You visited or have ordered from </h2>
 							<div class="card-body">
-								<div data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
+								<span data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
 									<span id="InstoresCounts" class="fs-1 text-danger fw-semibold">count</span> store(s)
-								</div>
+								</span>
 							</div>
 						</div>
 					</div>
@@ -253,7 +253,7 @@
 						<div class="card mb-5 fs-3 w-100 d-flex flex-column">
 							<h2 class="card-header fw-bold">You shopped on these days of the week</h2>
 							<div class="card-body">
-								<div class="row" id="daysOfTheWeek"></div>
+								<p class="row" id="daysOfTheWeek"></p>
 							</div>
 						</div>
 					</div>
@@ -266,12 +266,12 @@
 						<div class="card mb-5 fs-3">
 							<h2 class="card-header fw-bold">Your most expensive shop was </h2>
 							<div class="card-body">
-								<div data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
+								<span data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
 
 									<p><span class="fs-1 text-primary fw-semibold" id="expensiveShopAmount">Most
 										spent</span> on <span id="expensiveShopDate" class="fs-1 text-primary fw-semibold">date</span> at</p>
 									<p><span class="fs-1 text-primary fw-semibold" id="expensiveShopStore">store</span></p>
-								</div>
+								</span>
 							</div>
 						</div>
 					</div>
@@ -283,13 +283,13 @@
 						<div class="card fs-3">
 							<h2 class="card-header fw-bold">Your biggest shop consisted of </h2>
 							<div class="card-body">
-								<div data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
+								<span data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
 
 									<p><span class="fs-1 text-secondary fw-semibold" id="biggestShopItems">Items </span>
 									items on <span id="biggestShopDate" class="fs-1 text-secondary fw-semibold">date</span> at</p>
 									<p>
 									<span class="fs-1 text-secondary fw-semibold" id="biggestShopStore">store</span></p>
-								</div>
+								</span>
 							</div>
 						</div>
 					</div>
@@ -367,8 +367,8 @@
 						<div class="card fs-3 mb-5">
 							<h2 class="card-header fw-bold">In total, you have spent</h2>
 							<div class="card-body">
-								<div class="fs-1 text-danger fw-semibold" id="totalSpent" data-aos="fade-left"
-									data-aos-anchor-placement="top-center" data-aos-delay="400">Spent</div>
+								<span class="fs-1 text-danger fw-semibold" id="totalSpent" data-aos="fade-left"
+									data-aos-anchor-placement="top-center" data-aos-delay="400">Spent</span>
 							</div>
 						</div>
 					</div>
@@ -402,11 +402,11 @@
 						<div class="card fs-3">
 							<h2 class="card-header fw-bold">On average (mean), you spend </h2>
 							<div class="card-body">
-								<div data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
+								<span data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
 									<span id="averageSpend" class="fs-1 text-warning fw-semibold">Av spend</span> per
 									shop or <span id="averageWeeklySpend" class="fs-1 text-warning fw-semibold">Av
 										week</span> per week.
-								</div>
+								</span>
 							</div>
 						</div>
 					</div>
@@ -468,12 +468,12 @@
 						<div class="card fs-3 mb-5">
 							<h2 class="card-header fw-bold">You have purchased</h2>
 							<div class="card-body">
-								<div data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
+								<span data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
 									<span id="totalItems" class="fs-1 text-primary fw-semibold">Items</span> items,
 									comprising of
 									<span id="totalProducts" class="fs-1 text-primary fw-semibold">Products</span>
 									different products
-								</div>
+								</span>
 							</div>
 						</div>
 					</div>
@@ -486,11 +486,11 @@
 						<div class="card fs-3 mb-5">
 							<h2 class="card-header fw-bold">On average (mean), you purchase </h2>
 							<div class="card-body">
-								<div data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
+								<span data-aos="fade-left" data-aos-anchor-placement="top-center" data-aos-delay="400">
 									<span id="averageItems" class="fs-1 text-secondary fw-semibold">Av items</span>
 									items
 									per shop
-								</div>
+								</span>
 							</div>
 						</div>
 					</div>
