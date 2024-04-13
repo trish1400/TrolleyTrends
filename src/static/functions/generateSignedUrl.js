@@ -5,8 +5,6 @@ export async function onRequestGet(context) {
   console.log('with context.env', context.env.STORAGE_ACCOUNT, context.env.CONTAINER_NAME, context.env.SAS_TOKEN); // For debugging
   //console.log('Environment Variables:', context.env);
 
-  console.log('here I am');
-
   // Extract the blobName from the query parameters
   const url = new URL(context.request.url);
   const blobName = url.searchParams.get('blobName');
