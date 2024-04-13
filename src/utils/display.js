@@ -5,6 +5,9 @@ import {formatPrettyDate, formatValue, makeStringNameSafe} from './helpers.js';
 import { getEarliestPurchaseDate, getLatestPurchaseDate, getTotalAmountSpent, getCountItems, getAverageSpend, calculateAverageSpentPerWeek, getTotalAmountSaved, getCountInstores, getTopProducts, getFrequency, getMostExpensiveShop, getBiggestShop, getTimeBetween, getGapBetweenPurchases, getTotalSpentAndPercentageForAllDays, getTotalTransactionsAndPercentageForAllDays } from './processData.js';
 import { getRawPurchasesData, getRawProductsData, getAnonPurchasesData, getAnonProductsData, getAnonPurchasesByWeek } from './processData.js';
 import { createScatterChart, drawStoresWithCounts, createWeeklyChart, createPriceChart} from './charts.js';
+import { setupContributeButtonEventListener} from './postTescoAnon.js';
+import { dataStore } from './dataStore.js';
+
 
 
 export function displayInProgress() {
@@ -69,7 +72,7 @@ export function displayInvalidFile() {
 
 
 
-export function displayPurchaseData(purchases,storeNames) {
+export function displayPurchaseData(purchases) {
 
     ////TOTALS
 
@@ -159,33 +162,30 @@ export function displayPurchaseData(purchases,storeNames) {
     //// ----------- CHARTS and TABLES ------------
 
     //stores
-    drawStoresWithCounts(purchases,storeNames);
+    drawStoresWithCounts(purchases);
 
     //days of week
     showPurchasesByDays('daysOfTheWeek', purchases);
 
     //all shops
-    createScatterChart('purchasesScatterChart', purchases, storeNames);
-
+    createScatterChart('purchasesScatterChart', purchases);
 
 
 
 }
 
-export function displayProductData(aggregatedProducts, products) {
-
+export function displayProductData() {
 
     // number products
+    const aggregatedProducts = dataStore.getData('aggregatedProducts');
     const countProducts = aggregatedProducts.length;
     displayData(countProducts, 'totalProducts');
 
 
     // Initial call to populate the product list on page load
-    updateTopProducts(3, 'quantity-high', 'topQuanitityProductsTable', aggregatedProducts, products);
-    updateTopProducts(3, 'total-spent-high', 'topSpendProductsTable',aggregatedProducts, products);
-    updateTopProducts(3, 'max-price-high', 'topPriceProductsTable',aggregatedProducts, products);
-
-    setupEventListeners(aggregatedProducts, products);
+    updateTopProducts(3, 'quantity-high', 'topQuanitityProductsTable');
+    updateTopProducts(3, 'total-spent-high', 'topSpendProductsTable');
+    updateTopProducts(3, 'max-price-high', 'topPriceProductsTable');
 
 }
 
@@ -196,6 +196,7 @@ export function displayProductData(aggregatedProducts, products) {
 export function displayWeeklyProductData(weeklyPurchases) {
 
     createWeeklyChart(weeklyPurchases, 'weeklyBarChart');
+
 
 }
 
@@ -296,8 +297,9 @@ function showPurchasesByDays(parentContainerId,purchases) {
 
 
 
-function listProducts(topProducts, element, products) {
+function listProducts(topProducts, element) {
 
+    const products = dataStore.getData('products');
 
     const container = document.getElementById(element); // Get the container
 
@@ -384,19 +386,19 @@ function listProducts(topProducts, element, products) {
 
 
 
-export function updateTopProducts(numRecords, sortOrder, element,aggregatedProducts, products) {
+export function updateTopProducts(numRecords, sortOrder, element) {
 
     // Get the selected number of records and sort order from the dropdowns
 
     // Call getTopProducts with the selected values
-    const topProducts = getTopProducts(parseInt(numRecords, 10), sortOrder, aggregatedProducts);
+    const topProducts = getTopProducts(parseInt(numRecords, 10), sortOrder);
 
     // Clear the current product list
     const container = document.getElementById(element);
     container.innerHTML = '';
 
     // Call listProducts to redraw the product cards with the new top products
-    listProducts(topProducts, element, products);
+    listProducts(topProducts, element);
 
 }
 
@@ -460,19 +462,78 @@ export async function downloadCSV(filename) {
 }
 
 
-function setupEventListeners(aggregatedProducts,products) {
+export function setupProductCountEventListeners() {
 
     //product number of records dropdown listeners
     document.getElementById('totalSpendProductsNumRecordsDropdown').addEventListener('change', function() {
-        updateTopProducts(this.value, 'total-spent-high', 'topSpendProductsTable', aggregatedProducts, products);
+        updateTopProducts(this.value, 'total-spent-high', 'topSpendProductsTable');
     });
 
     document.getElementById('topQuantityProductsNumRecordsDropdown').addEventListener('change', function() {
-        updateTopProducts(this.value, 'quantity-high','topQuanitityProductsTable', aggregatedProducts, products);
+        updateTopProducts(this.value, 'quantity-high','topQuanitityProductsTable');
     });
 
     document.getElementById('topPriceProductsNumRecordsDropdown').addEventListener('change', function() {
-        updateTopProducts(this.value, 'max-price-high','topPriceProductsTable', aggregatedProducts, products);
+        updateTopProducts(this.value, 'max-price-high','topPriceProductsTable');
     });
+
+}
+
+export function setupModalListener()
+{
+document.addEventListener('DOMContentLoaded', function() {
+  
+  const myModal = document.getElementById('myModal');
+  myModal.addEventListener('show.coreui.modal', event => {
+      const button = event.relatedTarget; // Button that triggered the modal
+
+      // Extract info from data-coreui-* attributes
+      const modalTitleContent = button.getAttribute('data-coreui-title');
+      const contentFile = button.getAttribute('data-coreui-content');
+      const contentFile2 = button.getAttribute('data-coreui-content2');
+      const footerFile = button.getAttribute('data-coreui-footer');
+
+      // Set the content of #myModalLabel
+      const modalTitle = myModal.querySelector('#myModalLabel');
+      if (modalTitle) {
+          modalTitle.textContent = modalTitleContent;
+      }
+
+      // Function to load content from a URL
+      const fetchContent = async (url) => {
+          const response = await fetch(url);
+          if (!response.ok) throw new Error(`Error loading modal content from ${url}`);
+          return await response.text();
+      };
+
+      // Load the main content from contentFile
+      fetchContent(contentFile)
+      .then(contentHtml => {
+          // Check if there is a second content file
+          if (contentFile2) {
+              // Fetch the second content file
+              return fetchContent(contentFile2).then(contentHtml2 => contentHtml + contentHtml2);
+          }
+          return contentHtml;
+      })
+      .then(fullContentHtml => {
+          // Set the combined content to modal body
+          myModal.querySelector('#myModalBody').innerHTML = fullContentHtml;
+
+          // Load footer if specified
+          if (footerFile) {
+              return fetchContent(footerFile).then(footerHtml => {
+                  myModal.querySelector('#myModalFooterButtons').innerHTML = footerHtml;
+              });
+          } else {
+              myModal.querySelector('#myModalFooterButtons').innerHTML = '';
+          }
+      })
+      .catch(error => {
+          console.error('Error loading content:', error);
+          myModal.querySelector('#myModalBody').innerHTML = '<p>Sorry, the content could not be loaded.</p>';
+      });
+  });
+});
 
 }

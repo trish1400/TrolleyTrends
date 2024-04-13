@@ -1,22 +1,22 @@
 import { findStoreInfo, getColor, mapPurchaseType, secureHash, generateRandomOffset, generateGUID, formatSQLDate, shiftValue} from './helpers.js';
 import { displayInProgress, displayResults, displayInvalidFile, displayPurchaseData, displayProductData, displayWeeklyProductData} from './display.js';
-
-
-let jsonData = {};
-
+import { dataStore } from './dataStore.js';
 
 export async function handleFileInputChange(event) {
     const file = event.target.files[0];
+
     if (file) {
         try {
-            jsonData = await readFileAsJson(file);
+            const jsonData = await readFileAsJson(file);
             if (validateJsonSchema(jsonData)) {
                 processJsonData(jsonData);
                 displayInProgress();
             } else {
                 console.error("Error processing the file");
                 displayInvalidFile();
-            }
+            };
+            dataStore.updateData('jsonData', jsonData);
+
         } catch (error) {
             console.error("Error processing the file", error);
             displayInvalidFile();
@@ -34,26 +34,31 @@ async function readFileAsJson(file) {
 }
 
 
-async function processJsonData() {
+async function processJsonData(jsonData) {
     try {
-        const storeNames = await processStoreNames(); // Store the returned value
+        const storeNames = await processStoreNames(jsonData); // Store the returned value
+        dataStore.updateData('storeNames', storeNames);
 
         // Concurrently run getPurchasesData and getProductsData and assign their results
-        const [purchases, products] = await Promise.all([getPurchasesData(storeNames), getProductsData(storeNames)]);
+        const [purchases, products] = await Promise.all([getPurchasesData(), getProductsData()]);
+        dataStore.updateData('purchases', purchases);
+        dataStore.updateData('products', products);
 
-        displayPurchaseData(purchases,storeNames);
+        displayPurchaseData(purchases);
 
 
         // Now that getPurchasesData has completed, process and display purchase data
         const weeklyPurchases = await aggregatePurchasesByWeek(purchases);
-
+        dataStore.updateData('weeklyPurchases', weeklyPurchases);
 
         // Now that getProductsData has completed, process and display product data
         const aggregatedProducts = await getAggregatedProductData(products);
-        displayProductData(aggregatedProducts, products);
+        dataStore.updateData('aggregatedProducts', aggregatedProducts);
 
+        displayProductData(aggregatedProducts, products);
         displayWeeklyProductData(weeklyPurchases); // Further processing/displaying, details depend on implementation
         displayResults();
+
     } catch (error) {
         console.error("An error occurred in processing JSON data:", error);
     }
@@ -69,7 +74,7 @@ function validateJsonSchema(jsonData) {
 }
 
 
-function processStoreNames() {
+function processStoreNames(jsonData) {
     return new Promise((resolve, reject) => {
         try {
             const storeInfoMap = {};
@@ -124,6 +129,8 @@ function processStoreNames() {
 
 function getOutcode() {
 
+    const jsonData = dataStore.getData('jsonData');
+
     const postcode = jsonData["Customer Profile And Contact Data"]["Clubcard Accounts"]["postal address"]["postcode"] || "XX0 0XX";
 
     if (!postcode) return ''; // Return an empty string if no postcode is provided
@@ -148,6 +155,9 @@ function getOutcode() {
 
 
 export function getRawPurchasesData() {
+
+    const jsonData = dataStore.getData('jsonData');
+
     // Processing to get 'purchases'
     const purchases = jsonData['Purchase'].flatMap(purchase =>
         purchase.map(record => {
@@ -183,6 +193,9 @@ export function getRawPurchasesData() {
 
 
 export function getRawProductsData() {
+
+    const jsonData = dataStore.getData('jsonData');
+
     // Process and return the products data
     const products = jsonData['Purchase'].flatMap(purchase =>
         purchase.flatMap(record => {
@@ -208,7 +221,8 @@ export function getRawProductsData() {
 }
 
 
-async function getPurchasesData(storeNames) {
+async function getPurchasesData() {
+
     try {
         const purchases = getRawPurchasesData().map(purchase => {
             const date = new Date(purchase.timeStamp);
@@ -216,7 +230,7 @@ async function getPurchasesData(storeNames) {
             if (mapPurchaseType(purchase.purchaseType) === 'Delivery') {
                 storeId = '9999'; // Special case handling
             }
-            const storeInfo = findStoreInfo(storeId,storeNames) || {};
+            const storeInfo = findStoreInfo(storeId) || {};
             return {
                 date,
                 storeName: storeInfo.storeName || 'Unknown',
@@ -238,7 +252,7 @@ async function getPurchasesData(storeNames) {
 
 
 
-async function getProductsData(storeNames) {
+async function getProductsData() {
     try {
         const products = getRawProductsData()
             .filter(product =>
@@ -250,7 +264,7 @@ async function getProductsData(storeNames) {
                 if (mapPurchaseType(product.purchaseType) === 'Delivery') {
                     storeId = '9999'; // Special store ID for delivery type
                 }
-                const storeInfo = findStoreInfo(storeId,storeNames) || {};
+                const storeInfo = findStoreInfo(storeId) || {};
                 return {
                     name: product.name,
                     quantity: product.quantity === null ? 1 : product.quantity,
@@ -270,7 +284,10 @@ async function getProductsData(storeNames) {
 }
 
 
-async function getAggregatedProductData(products) {
+async function getAggregatedProductData() {
+
+    const products = dataStore.getData('products');
+
     try {
         const aggregatedProducts = {};
         products.forEach(product => {
@@ -322,7 +339,11 @@ function getWeekCommencing(date) {
 
 
 
-async function aggregatePurchasesByWeek(purchases) {
+async function aggregatePurchasesByWeek() {
+
+    const purchases = dataStore.getData('purchases');
+
+
     try {
         const weeklyData = {}; // Object for key-based access
         
@@ -374,6 +395,9 @@ async function aggregatePurchasesByWeek(purchases) {
 
 
 export function getAnonPurchasesByWeek() {
+
+    const weeklyPurchases = dataStore.getData('weeklyPurchases');
+
     if (!Array.isArray(weeklyPurchases) || weeklyPurchases.length === 0) {
         console.error('No weekly purchases data available');
         return [];
@@ -438,7 +462,7 @@ export function getAnonPurchasesByWeek() {
 
 
 export async function getAnonPurchasesData() {
-    const rawPurchasesData = getRawPurchasesData(); // Assume this synchronously returns an array
+    const rawPurchasesData = getRawPurchasesData();
 
     const anonPurchasesData = await Promise.all(rawPurchasesData.map(async (purchase) => {
         try {
@@ -636,7 +660,9 @@ export function getCountInstores(purchases){
 }
 
 
-export function getTopProducts(number, sortParam, aggregatedProducts) {
+export function getTopProducts(number, sortParam) {
+
+    const aggregatedProducts = dataStore.getData('aggregatedProducts');
 
     let sortedResult;
 

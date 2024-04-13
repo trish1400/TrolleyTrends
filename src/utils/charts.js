@@ -2,12 +2,12 @@ import Chart from 'chart.js/auto';
 import 'chartjs-adapter-date-fns';
 import { formatDate, findStoreInfo, getColor, makeStringNameSafe } from './helpers.js';
 
-function prepareScatterChartData(purchases,storeNames) {
+function prepareScatterChartData(purchases) {
     const datasets = {};
 
     purchases.forEach(purchase => {
         // Use storeId to find the store info
-        const storeInfo = findStoreInfo(purchase.storeId, storeNames);
+        const storeInfo = findStoreInfo(purchase.storeId);
         const label = storeInfo && storeInfo.storeName ? storeInfo.storeName : 'Unknown';
 
         // Initialize the dataset for this label if it doesn't already exist
@@ -36,9 +36,9 @@ function prepareScatterChartData(purchases,storeNames) {
 
 
 
-export function createScatterChart(chartElementId, purchases, storeNames) {
+export function createScatterChart(chartElementId, purchases) {
     const ctx = document.getElementById(chartElementId).getContext('2d');
-    const data = prepareScatterChartData(purchases, storeNames);
+    const data = prepareScatterChartData(purchases);
 
     const myScatterChart = new Chart(ctx, {
         type: 'scatter',
@@ -134,14 +134,14 @@ function generateCustomDynamicLegend(chart, legendContainerId, hasRollingAverage
 
 
 
-export function drawStoresWithCounts(purchases,storeNames) {
+export function drawStoresWithCounts(purchases) {
     const storeCounts = {};
     const storeValues = {};
     const backgroundColors = {};
 
     purchases.forEach(purchase => {
         const storeId = purchase.storeId;
-        const storeInfo = findStoreInfo(storeId,storeNames); // Look up store info by storeId
+        const storeInfo = findStoreInfo(storeId); // Look up store info by storeId
 
         if (!storeInfo) return; // Skip if store info is not found
 
@@ -158,7 +158,7 @@ export function drawStoresWithCounts(purchases,storeNames) {
 
     // Prepare labels using storeIds, mapping them back to store names
     const labels = Object.keys(storeCounts).map(storeId => {
-        const storeInfo = findStoreInfo(storeId,storeNames);
+        const storeInfo = findStoreInfo(storeId);
         return storeInfo && storeInfo.storeName ? storeInfo.storeName : 'Unknown';
     });
 

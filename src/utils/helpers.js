@@ -1,3 +1,5 @@
+import { dataStore } from './dataStore.js';
+
 const colorPalette = [
     '#117733',
     '#44AA99',
@@ -101,7 +103,8 @@ export function formatValue(value) {
 
 
 // Helper function to find store info by storeId
-export function findStoreInfo(storeId,storeNames) {
+export function findStoreInfo(storeId) {
+    const storeNames = dataStore.getData('storeNames');
     // Ensure storeId is treated as a string for comparison
     const storeIdStr = storeId.toString();
     return storeNames.find(store => store.storeId === storeIdStr);
@@ -191,3 +194,5 @@ export function showToast(message, type) {
       toastContainer.removeChild(toast);
     }, 20000); // Auto-remove the toast after 20 seconds
   }
+
+
