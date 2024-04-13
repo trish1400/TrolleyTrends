@@ -2,8 +2,8 @@
     <div class="row py-3">
         <div class="col-md-12">
 
-            <h3>What's the purpose for collecting this data and what will be done
-                with it?</h3>
+            <h3>If I submit my anonymised data, what purpose will be be used for?</h3>
+
             <p>Your Trolley Trends data could be very valuable in observing the Cost of
                 Living crisis, it could be used to identify rising prices or
                 shrink-flation. It could be used to enhance or interface with other
@@ -22,8 +22,8 @@
     <div class="row py-3">
         <div class="col-md-12">
 
-            <h3>What data is collected?</h3>
-            <p>Three datasets are submitted. The datasets and a description of the
+            <h3>If I submit my anonymised data, what data is collected?</h3>
+            <p>Three datasets will be submitted. The datasets and a description of the
                 fields are: </p>
 
             <ul>
@@ -105,6 +105,8 @@
 
             <p>The Weekly data dataset is the only dataset where the records are grouped by submission.</p>
 
+            <p>Prior to submission you can download the data that will be submitted in CSV format to review it.</p>
+
         </div>
     </div>
     <div class="row py-3">
@@ -126,19 +128,20 @@
 
             <h3 class="py-3">Test cases for anonymisation vs psuedo-anonymisation</h3>
             <p>
-                The below contains the challenges and reasoning to support that the data is pseudo-anonymised.
+                The below contains the challenges and reasoning to support that the data is anonymised.  
+                It must be at least reasonably unlikely to be able to relate the data back to an individual.   
             </p>
 
             <h4 class="h5">The following supplementary personal information is considered to be 'reasonably likely
                 to be used':</h4>
             <ul>
-                <li>Observation of an individual checkout (store, time, potentially the amount spent, and
+                <li>Observation of an individual at a till (store, time, potentially the amount spent, and
                     potentially some items purchased).</li>
                 <li>A receipt belonging to a known individual (store, time, amount spent, and items purchased).</li>
                 <li>A bank or credit card statement (store, date, and amount spent).</li>
                 <li> An awareness of the postcode outcode (the part to the left of the space) of the individual's
                     residence.</li>
-                <li>A version of the JSON data that was submitted (but not containing all the same information).
+                <li>A version of the source data for the same loyalty card (but not containing all the same information).
                 </li>
             </ul>
 
@@ -201,7 +204,7 @@
                 </li>
                 <li>For the weekly data, which does retain a relationship between records, the identifier is
                     randomly generated per submission, so if
-                    the data was submitted again another identifier would be generated and it would not be possible
+                    the data was submitted again, another identifier would be generated and it would not be possible
                     to relate these records to the previously
                     submitted records.</li>
             </ul>

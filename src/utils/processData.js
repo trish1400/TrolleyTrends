@@ -1,38 +1,11 @@
-let purchases = [];
-let products = [];
+import { findStoreInfo, getColor, mapPurchaseType, secureHash, generateRandomOffset, generateGUID, formatSQLDate, shiftValue} from './helpers.js';
+import { displayInProgress, displayResults, displayInvalidFile, displayPurchaseData, displayProductData, displayWeeklyProductData} from './display.js';
 
-let aggregatedProducts = [];
-let storeNames = [];
-let weeklyPurchases = [];
+
 let jsonData = {};
 
 
-
-document.addEventListener('DOMContentLoaded', function() {
-    setupFileInputListener();
-});
-
-
-document.getElementById('totalSpendProductsNumRecordsDropdown').addEventListener('change', function() {
-    updateTopProducts(this.value, 'total-spent-high', 'topSpendProductsTable');
-});
-
-document.getElementById('topQuantityProductsNumRecordsDropdown').addEventListener('change', function() {
-    updateTopProducts(this.value, 'quantity-high','topQuanitityProductsTable');
-});
-
-document.getElementById('topPriceProductsNumRecordsDropdown').addEventListener('change', function() {
-    updateTopProducts(this.value, 'max-price-high','topPriceProductsTable');
-});
-
-
-
-
-function setupFileInputListener() {
-    document.getElementById('fileInput').addEventListener('change', handleFileInputChange);
-}
-
-async function handleFileInputChange(event) {
+export async function handleFileInputChange(event) {
     const file = event.target.files[0];
     if (file) {
         try {
@@ -61,29 +34,30 @@ async function readFileAsJson(file) {
 }
 
 
-
-
 async function processJsonData() {
-    await processStoreNames();
+    try {
+        const storeNames = await processStoreNames(); // Store the returned value
 
-    // Use Promise.all to run getPurchasesData and getProductsData concurrently
-    await Promise.all([getPurchasesData(), getProductsData()]);
+        // Concurrently run getPurchasesData and getProductsData and assign their results
+        const [purchases, products] = await Promise.all([getPurchasesData(storeNames), getProductsData(storeNames)]);
 
-    // Now that getPurchasesData has completed, you can proceed with these
-    await aggregatePurchasesByWeek();
-    displayPurchaseData();
+        displayPurchaseData(purchases,storeNames);
 
-    // Now that getProductsData has completed, you can proceed with getAggregatedProductData
-    await getAggregatedProductData();
 
-    // Finally, display the rest of the data
-    displayProductData();
-    displayWeeklyProductData();
-    displayResults();
+        // Now that getPurchasesData has completed, process and display purchase data
+        const weeklyPurchases = await aggregatePurchasesByWeek(purchases);
 
+
+        // Now that getProductsData has completed, process and display product data
+        const aggregatedProducts = await getAggregatedProductData(products);
+        displayProductData(aggregatedProducts, products);
+
+        displayWeeklyProductData(weeklyPurchases); // Further processing/displaying, details depend on implementation
+        displayResults();
+    } catch (error) {
+        console.error("An error occurred in processing JSON data:", error);
+    }
 }
-
-
 
 
 
@@ -97,69 +71,56 @@ function validateJsonSchema(jsonData) {
 
 function processStoreNames() {
     return new Promise((resolve, reject) => {
-        // Simulate an asynchronous operation, like fetching data from an API
-        setTimeout(() => {
-            // Assume this function fetches and processes store names
+        try {
             const storeInfoMap = {};
-            let colorIndex = 0; // Initialize color index
-        
+            let colorIndex = 0;
+
             jsonData['Purchase'].forEach(purchase => {
                 purchase.forEach(record => {
-                    // Ensure storeId is treated as a string
                     const storeId = record.storeId.toString();
-        
                     const storeName = record.storeName;
                     const storeFormat = record.storeFormat;
-        
-                    // Skip if storeFormat is 'NA' and storeName contains 'GHS' or 'Grocery'
+
                     if (storeFormat === 'NA' && (storeName.includes('GHS') || storeName.includes('Grocery'))) {
-                        return; // Continue to the next iteration
+                        return; // Skip this iteration
                     }
-        
-                    // Initialize the store ID key with an empty array if not already present
+
                     if (!storeInfoMap[storeId]) {
                         storeInfoMap[storeId] = [];
                     }
-        
-                    // Format store name if it is in uppercase
+
                     let formattedStoreName = storeName;
                     if (storeName === storeName.toUpperCase()) {
                         formattedStoreName = storeName.toLowerCase().split(' ').map(word => word.charAt(0).toUpperCase() + word.slice(1)).join(' ');
                     }
-        
-                    // Construct the store info object
+
                     const storeInfo = { storeName: formattedStoreName, storeFormat };
-        
-                    // Check if the store info is not already present in the array
-                    const isStoreInfoPresent = storeInfoMap[storeId].some(info =>
-                        info.storeName.toLowerCase() === formattedStoreName.toLowerCase() && info.storeFormat === storeFormat);
-        
-                    // Add the store info if it's not already present
+                    const isStoreInfoPresent = storeInfoMap[storeId].some(info => info.storeName.toLowerCase() === formattedStoreName.toLowerCase() && info.storeFormat === storeFormat);
+
                     if (!isStoreInfoPresent) {
                         storeInfoMap[storeId].push(storeInfo);
                     }
                 });
             });
-        
-            // Explicitly add an entry for storeId '9999'
+
             if (!storeInfoMap['9999']) {
                 storeInfoMap['9999'] = [{ storeName: 'Home Delivery', storeFormat: 'Delivery' }];
             }
-        
-            // Transform the map into an array of objects with storeId, storeName, storeFormat, and color
-            storeNames = Object.keys(storeInfoMap).map(storeId => {
-                // Prefer the name originally in lowercase, if available
+
+            const storeNames = Object.keys(storeInfoMap).map(storeId => {
                 const preferredInfo = storeInfoMap[storeId].find(info => info.storeName !== info.storeName.toUpperCase()) || storeInfoMap[storeId][0];
-        
-                // Assign color: black for 'Delivery', use getColor for others and increment colorIndex
                 const color = preferredInfo.storeFormat === 'Delivery' ? '#332288' : getColor(colorIndex++);
-        
                 return { storeId, storeName: preferredInfo.storeName, storeFormat: preferredInfo.storeFormat, color };
             });
-            resolve();
-        }, 0);
+
+            resolve(storeNames); // Resolve with storeNames directly
+        } catch (error) {
+            reject(error); // Properly handle and report errors
+        }
     });
 }
+
+
 
 function getOutcode() {
 
@@ -186,7 +147,7 @@ function getOutcode() {
 }
 
 
-function getRawPurchasesData() {
+export function getRawPurchasesData() {
     // Processing to get 'purchases'
     const purchases = jsonData['Purchase'].flatMap(purchase =>
         purchase.map(record => {
@@ -221,7 +182,7 @@ function getRawPurchasesData() {
 
 
 
-function getRawProductsData() {
+export function getRawProductsData() {
     // Process and return the products data
     const products = jsonData['Purchase'].flatMap(purchase =>
         purchase.flatMap(record => {
@@ -247,122 +208,101 @@ function getRawProductsData() {
 }
 
 
+async function getPurchasesData(storeNames) {
+    try {
+        const purchases = getRawPurchasesData().map(purchase => {
+            const date = new Date(purchase.timeStamp);
+            let storeId = purchase.storeId;
+            if (mapPurchaseType(purchase.purchaseType) === 'Delivery') {
+                storeId = '9999'; // Special case handling
+            }
+            const storeInfo = findStoreInfo(storeId,storeNames) || {};
+            return {
+                date,
+                storeName: storeInfo.storeName || 'Unknown',
+                storeId,
+                storeFormat: storeInfo.storeFormat || 'Unknown',
+                purchaseType: mapPurchaseType(purchase.purchaseType),
+                basketValueGross: parseFloat(purchase.basketValueGross),
+                basketValueNet: parseFloat(purchase.basketValueNet),
+                overallBasketSavings: purchase.overallBasketSavings === 'NA' ? 0 : parseFloat(purchase.overallBasketSavings),
+                totalItems: purchase.totalItems
+            };
+        });
+        return purchases; // Return the processed data
+    } catch (error) {
+        console.error("Error processing purchase data: ", error);
+        throw error; // Re-throw the error if you need to handle it further up the chain
+    }
+}
 
-function getPurchasesData() {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            purchases = getRawPurchasesData().map(purchase => {
-        
-                const date = new Date(purchase.timeStamp);
-        
-                let storeId = purchase.storeId;
-        
-                // Check for special case where storeFormat is 'NA' and storeName includes 'GHS' or 'Grocery'
-                if (mapPurchaseType(purchase.purchaseType) === 'Delivery') {
-                    storeId = '9999'; // Use special storeId '9999' for this case
+
+
+async function getProductsData(storeNames) {
+    try {
+        const products = getRawProductsData()
+            .filter(product =>
+                !product.name.match(/SUBSTITUTION.*REFUND/i) && // Excludes products labeled as substitutions and refunds
+                parseFloat(product.price) !== 0.0 // Excludes products priced at zero
+            )
+            .map(product => {
+                let storeId = product.storeId.toString();
+                if (mapPurchaseType(product.purchaseType) === 'Delivery') {
+                    storeId = '9999'; // Special store ID for delivery type
                 }
-        
-                // Look up the storeName and storeFormat using the storeId
-                const storeInfo = findStoreInfo(storeId) || {};
-                const storeName = storeInfo.storeName || 'Unknown';
-                const storeFormat = storeInfo.storeFormat || 'Unknown';
-        
-                const totalItems = purchase.totalItems;
-        
+                const storeInfo = findStoreInfo(storeId,storeNames) || {};
                 return {
-                    date: date,
-                    storeName,
-                    storeId,
-                    storeFormat,
-                    purchaseType: mapPurchaseType(purchase.purchaseType),
-                    basketValueGross: parseFloat(purchase.basketValueGross),
-                    basketValueNet: parseFloat(purchase.basketValueNet),
-                    overallBasketSavings: purchase.overallBasketSavings === 'NA' ? 0 : parseFloat(purchase.overallBasketSavings),
-                    totalItems: totalItems
+                    name: product.name,
+                    quantity: product.quantity === null ? 1 : product.quantity,
+                    price: Math.abs(parseFloat(product.price)),
+                    purchaseType: mapPurchaseType(product.purchaseType),
+                    storeId: storeId,
+                    storeName: storeInfo.storeName || 'Unknown',
+                    date: new Date(product.timeStamp),
+                    storeFormat: storeInfo.storeFormat || 'Unknown'
                 };
             });
-            resolve();
-        }, 0); // Simulate a delay
-    });
+        return products; // Return the processed data
+    } catch (error) {
+        console.error("Error processing product data: ", error);
+        throw error; // Re-throw the error if you need to handle it further up the chain
+    }
 }
 
 
-function getProductsData() {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-                products = getRawProductsData()
-                .filter(product =>
-                    !product.name.match(/SUBSTITUTION.*REFUND/i) && // Excludes products with 'SUBSTITUTION' followed by 'REFUND'
-                    parseFloat(product.price) !== 0.0 // Excludes products with 0 price
-                )          
-                .map(product => {
-
-                    let storeId = product.storeId.toString();
-
-                    // Check for special case where storeFormat is 'NA' and storeName includes 'GHS' or 'Grocery'
-                    if (mapPurchaseType(product.purchaseType) === 'Delivery') {
-                        storeId = '9999'; // Use special storeId '9999' for this case
-                    }
-
-                    // Look up the storeName and storeFormat using the storeId
-                    const storeInfo = findStoreInfo(storeId) || {};
-                    const storeName = storeInfo.storeName || 'Unknown';
-                    const storeFormat = storeInfo.storeFormat || 'Unknown';
-
-                    return {
-                        name: product.name,
-                        quantity: product.quantity === null ? 1 : product.quantity,
-                        price: Math.abs(parseFloat(product.price)),
-                        purchaseType: mapPurchaseType(product.purchaseType),
-                        storeId: storeId,
-                        storeName: storeName,
-                        date: new Date(product.timeStamp),
-                        storeFormat: storeFormat
-                    };
-                });
-            resolve();
-        }, 0); // Simulate a delay
-    });
+async function getAggregatedProductData(products) {
+    try {
+        const aggregatedProducts = {};
+        products.forEach(product => {
+            const name = product.name;
+            if (!aggregatedProducts[name]) {
+                aggregatedProducts[name] = {
+                    name: name,
+                    productType: product.productType,
+                    totalQuantity: 0,
+                    minPrice: Infinity,
+                    maxPrice: -Infinity,
+                    totalPrice: 0
+                };
+            }
+            const quantity = product.quantity === null ? 1 : parseInt(product.quantity, 10);
+            const price = parseFloat(product.price);
+            aggregatedProducts[name].totalQuantity += quantity;
+            aggregatedProducts[name].minPrice = Math.min(aggregatedProducts[name].minPrice, price);
+            aggregatedProducts[name].maxPrice = Math.max(aggregatedProducts[name].maxPrice, price);
+            aggregatedProducts[name].totalPrice += price * quantity; // Total price for average calculation
+        });
+        const result = Object.values(aggregatedProducts).map(product => ({
+            ...product,
+            averagePrice: product.totalQuantity > 0 ? product.totalPrice / product.totalQuantity : 0
+        }));
+        return result; // Return the aggregated product data
+    } catch (error) {
+        console.error("Error aggregating product data: ", error);
+        throw error;
+    }
 }
 
-function getAggregatedProductData() {
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-
-            // Aggregate products by name
-            products.forEach(product => {
-                const name = product.name;
-                if (!aggregatedProducts[name]) {
-                    aggregatedProducts[name] = { 
-                        name: name, 
-                        productType: product.productType,
-                        totalQuantity: 0, 
-                        minPrice: Infinity, 
-                        maxPrice: -Infinity, 
-                        totalPrice: 0
-                    };
-                }
-        
-                const quantity = product.quantity === null ? 1 : parseInt(product.quantity, 10);
-        
-                const price = parseFloat(product.price);
-        
-                aggregatedProducts[name].totalQuantity += quantity;
-                aggregatedProducts[name].minPrice = Math.min(aggregatedProducts[name].minPrice, price);
-                aggregatedProducts[name].maxPrice = Math.max(aggregatedProducts[name].maxPrice, price);
-                aggregatedProducts[name].totalPrice += price * quantity; // Total price for average calculation
-            });
-        
-            const result = Object.values(aggregatedProducts).map(product => ({
-                ...product,
-                averagePrice: product.totalQuantity > 0 ? product.totalPrice / product.totalQuantity : 0
-            }));
-        
-            aggregatedProducts = result;
-            resolve();
-        }, 0); // Simulate a delay
-    });
-}
 
 
 function getWeekCommencing(date) {
@@ -382,63 +322,58 @@ function getWeekCommencing(date) {
 
 
 
-function aggregatePurchasesByWeek() {
+async function aggregatePurchasesByWeek(purchases) {
+    try {
+        const weeklyData = {}; // Object for key-based access
+        
+        purchases.forEach(purchase => {
+            const weekCommencing = getWeekCommencing(new Date(purchase.date));
+            const storeFormat = purchase.purchaseType === "Delivery" ? "Delivery" : purchase.storeFormat;
+            const key = `${weekCommencing}|${storeFormat}|${purchase.purchaseType}`;
+            
+            if (!weeklyData[key]) {
+                weeklyData[key] = {
+                    weekCommencing,
+                    storeFormat,
+                    purchaseType: purchase.purchaseType,
+                    basketValueGross: 0,
+                    basketValueNet: 0,
+                    overallBasketSavings: 0,
+                    totalItems: 0
+                };
+            }
+            
+            // Helper function to round numbers to two decimal places
+            const round = (num) => Math.round((num + Number.EPSILON) * 100) / 100;
+            
+            // Aggregate and round data to avoid floating-point precision issues
+            weeklyData[key].basketValueGross = round(weeklyData[key].basketValueGross + purchase.basketValueGross);
+            weeklyData[key].basketValueNet = round(weeklyData[key].basketValueNet + purchase.basketValueNet);
+            weeklyData[key].overallBasketSavings = round(weeklyData[key].overallBasketSavings + purchase.overallBasketSavings);
+            weeklyData[key].totalItems += purchase.totalItems;
+        });
 
-    return new Promise((resolve, reject) => {
-        setTimeout(() => {
-            // Assume this function fetches and processes product data
-            const weeklyData = {}; // Use an object for easier key-based access         
-        
-            purchases.forEach(purchase => {
-                const weekCommencing = getWeekCommencing(new Date(purchase.date));
-                // Use "Delivery" as storeFormat for purchaseType "Delivery"
-                const storeFormat = purchase.purchaseType === "Delivery" ? "Delivery" : purchase.storeFormat;
-                const key = `${weekCommencing}|${storeFormat}|${purchase.purchaseType}`;
-        
-                if (!weeklyData[key]) {
-                    weeklyData[key] = {
-                        weekCommencing,
-                        storeFormat: storeFormat, // Set storeFormat to "Delivery" for purchaseType "Delivery"
-                        purchaseType: purchase.purchaseType,
-                        basketValueGross: 0,
-                        basketValueNet: 0,
-                        overallBasketSavings: 0,
-                        totalItems: 0
-                    };
-                }
-        
-                // Round the floating-point result to two decimal places
-                const round = (num) => Math.round((num + Number.EPSILON) * 100) / 100;
-        
-                // Add and round each purchase to avoid floating-point precision issues
-                weeklyData[key].basketValueGross = round(weeklyData[key].basketValueGross + purchase.basketValueGross);
-                weeklyData[key].basketValueNet = round(weeklyData[key].basketValueNet + purchase.basketValueNet);
-                weeklyData[key].overallBasketSavings = round(weeklyData[key].overallBasketSavings + purchase.overallBasketSavings);
-        
-                weeklyData[key].totalItems += purchase.totalItems;
-            });
-        
-            // Convert the aggregated data from an object to an array
-            weeklyPurchases = Object.values(weeklyData);
+        // Convert the object to an array and handle date conversion
+        const weeklyPurchases = Object.values(weeklyData).map(item => ({
+            ...item,
+            weekCommencing: new Date(item.weekCommencing) // Ensure dates are Date objects
+        }));
 
-            weeklyPurchases.forEach(item => {
-                item.weekCommencing = new Date(item.weekCommencing); // Directly use the ISO string to create a Date object
-            });
+        // Sort the data by weekCommencing date
+        weeklyPurchases.sort((a, b) => a.weekCommencing - b.weekCommencing);
 
-            // Sort the array in ascending order based on the 'weekCommencing' dates
-            weeklyPurchases.sort((a, b) => a.weekCommencing - b.weekCommencing);
-
-            resolve(weeklyPurchases);
-
-        }, 0); // Simulate a delay
-    });
+        return weeklyPurchases; // Return the processed data
+    } catch (error) {
+        console.error("Error aggregating purchases by week: ", error);
+        throw error; // Re-throw the error if further handling is needed upstream
+    }
 }
 
 
 
 
 
-function getAnonPurchasesByWeek() {
+export function getAnonPurchasesByWeek() {
     if (!Array.isArray(weeklyPurchases) || weeklyPurchases.length === 0) {
         console.error('No weekly purchases data available');
         return [];
@@ -502,7 +437,7 @@ function getAnonPurchasesByWeek() {
 
 
 
-async function getAnonPurchasesData() {
+export async function getAnonPurchasesData() {
     const rawPurchasesData = getRawPurchasesData(); // Assume this synchronously returns an array
 
     const anonPurchasesData = await Promise.all(rawPurchasesData.map(async (purchase) => {
@@ -541,7 +476,7 @@ async function getAnonPurchasesData() {
 }
 
 
-async function getAnonProductsData() {
+export async function getAnonProductsData() {
     const rawProductsData = getRawProductsData();
 
     const anonProductsData = await Promise.all(rawProductsData.map(async (product) => {
@@ -580,7 +515,7 @@ async function getAnonProductsData() {
 }
 
 
-function getEarliestPurchaseDate() {
+export function getEarliestPurchaseDate(purchases) {
     if (purchases.length === 0) {
         return null; // or a suitable default value or message
     }
@@ -595,7 +530,7 @@ function getEarliestPurchaseDate() {
 
 }
 
-function getLatestPurchaseDate() {
+export function getLatestPurchaseDate(purchases) {
     if (purchases.length === 0) {
         return null; // or a suitable default value or message
     }
@@ -606,12 +541,12 @@ function getLatestPurchaseDate() {
         return latest > currentDate ? latest : currentDate;
     }, new Date(purchases[0].date)); // Initialize with the first purchase's date as a Date object
 
-    return latestDate; // Assuming formatDate properly formats Date objects
+    return latestDate;
 }
 
 
 
-function getTotalAmountSpent() {
+export function getTotalAmountSpent(purchases) {
     // Initialize total amount spent
     let totalAmountSpent = 0;
 
@@ -624,7 +559,7 @@ function getTotalAmountSpent() {
     return totalAmountSpent;
 }
 
-function getCountItems() {
+export function getCountItems(purchases) {
     // Initialize total amount spent
     let totalCountItems = 0;
 
@@ -636,7 +571,7 @@ function getCountItems() {
 }
 
 
-function getAverageSpend(totalSpent, countTransactions) {
+export function getAverageSpend(totalSpent, countTransactions) {
 
     const numericTotalSpent = totalSpent;
     const averageSpend = (numericTotalSpent / countTransactions).toFixed(2);
@@ -650,7 +585,7 @@ function getAverageSpend(totalSpent, countTransactions) {
 	
 }
 
-function calculateAverageSpentPerWeek(startDate, endDate, totalSpent) {
+export function calculateAverageSpentPerWeek(startDate, endDate, totalSpent) {
     // Parse the start and end dates
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -669,7 +604,7 @@ function calculateAverageSpentPerWeek(startDate, endDate, totalSpent) {
 }
 
 
-function getTotalAmountSaved() {
+export function getTotalAmountSaved(purchases) {
     // Initialize total amount saved
     let totalAmountSaved = 0;
 
@@ -687,7 +622,7 @@ function getTotalAmountSaved() {
 }
 
 
-function getCountInstores(){
+export function getCountInstores(purchases){
 
     const distinctStoreIdsCount = purchases.reduce((acc, purchase) => {
         if (purchase.purchaseType !== 'Delivery') {
@@ -701,7 +636,8 @@ function getCountInstores(){
 }
 
 
-function getTopProducts(number, sortParam) {
+export function getTopProducts(number, sortParam, aggregatedProducts) {
+
     let sortedResult;
 
     switch (sortParam) {
@@ -741,7 +677,7 @@ function getTopProducts(number, sortParam) {
 
 
 
-function getFrequency(earliestDate, latestDate, countTransactions) {
+export function getFrequency(earliestDate, latestDate, countTransactions) {
     const date1 = new Date(earliestDate);
     const date2 = new Date(latestDate);
 
@@ -753,7 +689,7 @@ function getFrequency(earliestDate, latestDate, countTransactions) {
     return frequency;
 }
 
-function getMostExpensiveShop() {
+export function getMostExpensiveShop(purchases) {
     if (!purchases || purchases.length === 0) {
         return null; // Return null if purchases list is empty or not provided
     }
@@ -781,7 +717,7 @@ function getMostExpensiveShop() {
     };
 }
 
-function getBiggestShop() {
+export function getBiggestShop(purchases) {
     if (!purchases || purchases.length === 0) {
         return null; // Return null if purchases list is empty or not provided
     }
@@ -808,7 +744,7 @@ function getBiggestShop() {
     };
 }
 
-function getTimeBetween(startDate, endDate) {
+export function getTimeBetween(startDate, endDate) {
     // Ensure dates are parsed
     const start = new Date(startDate);
     const end = new Date(endDate);
@@ -851,7 +787,7 @@ function getTimeBetween(startDate, endDate) {
 
 
 
-function getGapBetweenPurchases(purchases) {
+export function getGapBetweenPurchases(purchases) {
     if (purchases.length < 2) {
         return null; // Need at least two purchases to find a gap
     }
@@ -888,7 +824,7 @@ function getGapBetweenPurchases(purchases) {
 
 
 
-function getTotalSpentAndPercentageForAllDays() {
+export function getTotalSpentAndPercentageForAllDays(purchases) {
     const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     const results = {};
     let totalSpentOverall = 0;
@@ -930,7 +866,7 @@ function getTotalSpentAndPercentageForAllDays() {
     return results;
 }
 
-function getTotalTransactionsAndPercentageForAllDays() {
+export function getTotalTransactionsAndPercentageForAllDays(purchases) {
     const daysOfWeek = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
     const results = {};
     let totalTransactionsOverall = 0;

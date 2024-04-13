@@ -8,43 +8,23 @@
 	<meta charset="utf-8">
 	<meta name="viewport" content="width=device-width, initial-scale=1">
 
-	<!-- CoreUI for Bootstrap CSS -->
-	<link href="https://cdn.jsdelivr.net/npm/@coreui/coreui@4.3.2/dist/css/coreui.min.css" rel="stylesheet">
-	<link href="https://cdn.jsdelivr.net/npm/@coreui/icons@3.0.1/css/all.min.css" rel="stylesheet">
+	<meta property="og:title" content="Trolley Trends" />
+	<meta property="og:description" content="Client-side visualiser for Tesco Clubcard data" />
+	<meta property="og:type" content="website" />
+	<meta property="og:url" content="https://trolleytrends.com" />
+	<meta property="og:image" content="./static/images/android-chrome-192x192.png" />
 
-
-	<script src="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.js"
-		integrity="sha512-A7AYk1fGKX6S2SsHywmPkrnzTZHrgiVT7GcQkLGDe2ev0aWb8zejytzS8wjo7PGEXKqJOrjQ4oORtnimIRZBtw=="
-		crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/aos/2.3.4/aos.css"
-		integrity="sha512-1cK78a1o+ht2JcaW6g8OXYwqpev9+6GqOkz9xmBN9iUUhIndKtxwILGWYOSibOKjLsEdjyjZvYDq/cZwNeak0w=="
-		crossorigin="anonymous" referrerpolicy="no-referrer" />
-
-
-	<!-- Chart.js -->
-	<script src="https://cdn.jsdelivr.net/npm/chart.js@3.6.0/dist/chart.min.js"></script>
-	<script src="https://cdn.jsdelivr.net/npm/chartjs-adapter-date-fns@2.0.0/dist/chartjs-adapter-date-fns.bundle.min.js"></script>
-
-
-	<!-- Custom -->	
-	<link href="css/style.css" rel="stylesheet">
-	<script src="js/helpers.js"></script>
-	<script src="js/charts.js"></script>
-	<script src="js/display.js"></script>
-	<script src="js/postTescoAnon.js"></script>
-
-	<link rel="apple-touch-icon" sizes="180x180" href="images/apple-touch-icon.png">
-	<link rel="icon" type="image/png" sizes="32x32" href="images/favicon-32x32.png">
-	<link rel="icon" type="image/png" sizes="16x16" href="images/favicon-16x16.png">
-	<link rel="manifest" href="images/site.webmanifest">
+	<link rel="apple-touch-icon" sizes="180x180" href="./static/images/apple-touch-icon.png">
+	<link rel="icon" type="image/png" sizes="32x32" href="./static/images/favicon-32x32.png">
+	<link rel="icon" type="image/png" sizes="16x16" href="./static/images/favicon-16x16.png">
+	<link rel="manifest" href="./static/images/site.webmanifest">
 
 </head>
 
 <body>
 	<div class="wrapper d-flex flex-column min-vh-100 bg-light">
 		<header class="header mb-4 py-0 px-sm-4 px-1 shadow-sm">
-			<h1 class="h3"><img src="images/header.png" alt="Trolley Trends"></h1>
+			<h1 class="h3"><img src="./static/images/header.png" alt="Trolley Trends"></h1>
 		</header>
 
 		<main class="flex-grow-1">
@@ -79,9 +59,9 @@
 										<div class="text-body-secondary text-right fs-5">There are some 
 											<button type="button" class="btn btn-lg btn-link p-0"
 											data-coreui-toggle="modal" data-coreui-target="#myModal" 
-											data-coreui-content="modal-tescoData.html" 
-											data-coreui-title="About Tesco Clubcard data">known limitations</button> 
-											with the Clubcard data. The analysis and data visualisations can only be as good as the source data. 
+											data-coreui-content="static/modal-tescoData.html" 
+											data-coreui-title="About Tesco Clubcard data">known limitations
+											with Clubcard data</button>. The analysis and data visualisations can only be as good as the source data. 
 										</div>
 									</div>
 								</div>
@@ -95,7 +75,7 @@
 			<div class="container justify-content-center" id="spinner" style="display:none;" >
 				<div class="row">
 					<div class="col text-center">
-						<img src="images/android-chrome-192x192.png" id="spinnerTrolley" alt="loading..." role="status"/>
+						<img src="./static/images/android-chrome-192x192.png" id="spinnerTrolley" alt="loading..." role="status"/>
 					</div>
 				</div>
 			</div>
@@ -237,7 +217,7 @@
 						<div class="card mb-5 fs-3 d-flex flex-column">
 							<h2 class="card-header fw-bold">The stores you have used</h2>
 							<div class="card-body d-flex flex-column">
-								<canvas id="storesVisitedChart"></canvas>
+								<canvas id="storesVisitedChart" aria-label="Stores visited pie chart" role="img"></canvas>
 								<div id="storesVisitedChartLegend"
 									class="mt-auto border-top pt-2 d-flex flex-wrap align-items-center justify-content-start">
 								</div>
@@ -333,7 +313,7 @@
 								All your shops
 							</h2>
 							<div class="card-body">
-								<canvas id="purchasesScatterChart"></canvas>
+								<canvas id="purchasesScatterChart" aria-label="Purchases scatter chart" role="img"></canvas>
 								<div id="scatterChartLegend"
 									class="border-top mt-2 pt-2 d-flex flex-wrap align-items-center justify-content-start">
 								</div>
@@ -449,7 +429,7 @@
 								<span>How much you've spent each week</span>
 							</h2>
 							<div class="card-body">
-								<canvas id="weeklyBarChart"></canvas>
+								<canvas id="weeklyBarChart" aria-label="Bar chart of spending per week" role="img"></canvas>
 								<div id="weeklyBarChartLegend"
 									class="border-top mt-2 pt-2 d-flex flex-wrap align-items-center justify-content-start">
 								</div>
@@ -757,8 +737,8 @@
 											<button type="button" class="btn btn-light btn-lg fs-3" 
 											data-coreui-toggle="modal" data-coreui-target="#myModal" 
 											data-coreui-title="The data you are being asked to contribute"
-											data-coreui-content="modal-anonData.html"  
-											data-coreui-footer="modal-anonDataDownloads.html">Tell me more</button>
+											data-coreui-content="static/modal-anonData.html"  
+											data-coreui-footer="static/modal-anonDataDownloads.html">Tell me more and view anonymised data</button>
 
 										</div>
 
@@ -821,19 +801,20 @@
 					<div class="col-md-2 text-end">
 						<button type="button" class="btn btn-lg btn-link p-0 text-white"
 						data-coreui-toggle="modal" data-coreui-target="#myModal" 
-						data-coreui-content="modal-about.html" 
+						data-coreui-content="static/modal-about.html" 
 						data-coreui-title="About">About</button>
 					</div>
 					<div class="col-md-2 text-end">
 						<button type="button" class="btn btn-lg btn-link p-0 text-white"
 						data-coreui-toggle="modal" data-coreui-target="#myModal" 
-						data-coreui-content="modal-accessibility.html" 
+						data-coreui-content="static/modal-accessibility.html" 
 						data-coreui-title="Accessibility">Accessibility</button>
 					</div>
 					<div class="col-md-2 text-end">
 						<button type="button" class="btn btn-lg btn-link p-0 text-white"
 						data-coreui-toggle="modal" data-coreui-target="#myModal" 
-						data-coreui-content="modal-privacy.html" 
+						data-coreui-content="static/modal-privacy.html" 
+						data-coreui-content2="static/modal-anonData.html"
 						data-coreui-title="Privacy">Privacy</button>
 					</div>
 				</div>
@@ -841,8 +822,10 @@
 		</footer>
 	</div>
 
-	<script src="https://unpkg.com/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
-	<script src="js/processData.js"></script>
+<!-- 	<script src="/node_modules/@coreui/coreui/dist/js/coreui.bundle.min.js"></script>
+	<script src="js/processData.js"></script> -->
+
+	<script src="index.js" type="module"></script>
 
 </body>
 

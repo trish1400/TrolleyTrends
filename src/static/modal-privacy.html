@@ -1,0 +1,70 @@
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-12">
+
+            This relates to the Trolley Trends site located at https://www.trolleytrends.com
+
+            <h3>Personal data is not collected</h3>
+
+            <p>The point of this site is to provide client-side visualisation of your loyalty card data. Client-side
+                means the data is not submitted to a server,
+                the processsing and visualisations are created using javascript in your browser, without the data
+                leaving your device. No personal data is collected. You can enable Airplane mode (or similar) before
+                submitting your json file.</p>
+
+            <p>If you opt to contribute your data, then the data is <em>anonymised</em>, client-side in your browser, before it
+                is submitted.  This data is anonymised, not just pseudo-anonymised. See the bottom of this modal for more details on this.
+            </p>
+
+            <p>As no personal data is collected, all of this is outside of the scope of GPDR and similar legislation, however, I think transparency is 
+                important hence all these words.</p>
+
+            <h3>Processors</h3>
+            <p>The site is hosted with Cloudflare (about 20% of web goes through Cloudflare in some form).</p>
+            <p>If you submit your <em>anonymised</em> data, it goes via an Cloudflare Worker into Azure Blob Storage and then a Azure Function App puts it 
+                into an Azure SQL database.</p>
+
+
+            <h3>Cookies</h3>
+
+            <p>I don't set any first party cookies.</p>
+
+            <p>Cloudflare uses some strictly necessary cookies. You can read
+                <a href="https://www.cloudflare.com/en-gb/privacypolicy/" target="_blank" rel="noopener">Cloudflare's
+                    privacy policy</a> and
+                <a href="https://www.cloudflare.com/en-gb/cookie-policy/" target="_blank" rel="noopener">Cloudflare's
+                    cookie policy</a>.
+            </p>
+
+            <h3>Analytics</h3>
+
+            <p>The only analytics are <a href="https://www.cloudflare.com/en-gb/web-analytics" target="_blank"
+                    rel="noopener">Cloudflare web analytics</a>.
+                I get twitchy about Google Analytics (what does 'consent mode' really do?) and anything like Hotjar in
+                this context would be
+                completely against the principles of retaining your data clientside. Cloudflare Web Analytics does not
+                use any client-side state, such as cookies or localStorage, to collect usage metrics. It also doesn't
+                'fingerprint' individuals via their IP address, User Agent string, or any other data for the purpose of
+                displaying analytics.</p>
+
+            <p>I've also not used any CDNs for third-party packages to avoid any potential for tracking there.</p>
+
+            <h3>What about IP addresses, aren't they personal data?</h3>
+
+            <p>No, it depends on the context, if you are an ISP, then maybe. For most services using IP addresses, it makes no sense,
+                 at worst they could be a key to link psuedo-anonyomised datasets, but if you have no other personal data, the idea that 
+                 IP addresses alone are personal data makes no sense.  The EU General Court ruled so in April 2023 <a href="https://eur-lex.europa.eu/legal-content/EN/TXT/?uri=CELEX%3A62020TJ0557" 
+                 target="_blank" rel="noopener">SRB v EDPS</a>.</p>
+                 <p>Where possible, logs are kept to a minimum, not least because I'm not paying to store logs.</p>
+
+            <h3>Contact</h3>
+
+            <p>If you have any issues or questions about this, please get in touch by raising a <a
+            href="https://github.com/trish1400/TrolleyTrends/issues">GitHub</a> issue. Thanks!</p>
+
+
+        </div>
+    </div>
+</div>
+
+<hr />

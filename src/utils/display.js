@@ -1,6 +1,15 @@
-function displayInProgress() {
-	const upload = document.getElementById('uploadJson');
-	upload.style.display = 'none'; 
+import AOS from 'aos';
+import Chart from 'chart.js/auto';
+import 'chartjs-adapter-date-fns';
+import {formatPrettyDate, formatValue, makeStringNameSafe} from './helpers.js';
+import { getEarliestPurchaseDate, getLatestPurchaseDate, getTotalAmountSpent, getCountItems, getAverageSpend, calculateAverageSpentPerWeek, getTotalAmountSaved, getCountInstores, getTopProducts, getFrequency, getMostExpensiveShop, getBiggestShop, getTimeBetween, getGapBetweenPurchases, getTotalSpentAndPercentageForAllDays, getTotalTransactionsAndPercentageForAllDays } from './processData.js';
+import { getRawPurchasesData, getRawProductsData, getAnonPurchasesData, getAnonProductsData, getAnonPurchasesByWeek } from './processData.js';
+import { createScatterChart, drawStoresWithCounts, createWeeklyChart, createPriceChart} from './charts.js';
+
+
+export function displayInProgress() {
+    const upload = document.getElementById('uploadJson');
+    upload.style.display = 'none';
     const spinner = document.getElementById('spinner');
     const spinnerTrolley = document.getElementById('spinnerTrolley');
     spinner.style.display = 'flex'; // Use flex instead of block to enable flexbox properties
@@ -8,7 +17,7 @@ function displayInProgress() {
     spinnerTrolley.classList.add('animateProgress');
 }
 
-function displayResults() {
+export function displayResults() {
 
     const chartsContainer = document.getElementById('yourData');
     chartsContainer.style.display = 'block';
@@ -16,14 +25,14 @@ function displayResults() {
     dataContainer.style.display = 'block';
 
     setTimeout(() => {
-    
+
         const spinner = document.getElementById('spinner');
         const spinnerTrolley = document.getElementById('spinnerTrolley');
         spinner.style.display = 'none';
         spinner.classList.remove('d-flex'); // Remove d-flex when hiding the spinner
         spinnerTrolley.classList.remove('animateProgress');
 
-        AOS.init({        
+        AOS.init({
             // Global settings:
             disable: false, // accepts following values: 'phone', 'tablet', 'mobile', boolean, expression or function
             initClassName: 'aos-init', // class applied after initialization
@@ -32,8 +41,8 @@ function displayResults() {
             disableMutationObserver: false, // disables automatic mutations' detections (advanced)
             //debounceDelay: 50, // the delay on debounce used while resizing window (advanced)
             //throttleDelay: 99, // the delay on throttle used while scrolling the page (advanced)
-        
-        
+
+
             // Settings that can be overridden on per-element basis, by `data-aos-*` attributes:
             offset: 0, // offset (in px) from the original trigger point
             delay: 0, // values from 0 to 3000, with step 50ms
@@ -42,142 +51,141 @@ function displayResults() {
             once: true, // whether animation should happen only once - while scrolling down
             mirror: false // whether elements should animate out while scrolling past them
         });
-    }, 2000); 
+    }, 2000);
 
 
 }
 
 
 
+export function displayInvalidFile() {
+    const section = document.getElementById('errorFile');
+    section.style.display = 'block';
+    const upload = document.getElementById('useAirplaneMode');
+    upload.style.display = 'none';
 
-
-
-function displayInvalidFile() {
-	const section = document.getElementById('errorFile');
-	section.style.display = 'block'; 
-	const upload = document.getElementById('useAirplaneMode');
-	upload.style.display = 'none'; 
-	
 }
 
-  
 
 
-function displayPurchaseData() {
+
+export function displayPurchaseData(purchases,storeNames) {
 
     ////TOTALS
 
     // earliest purchase date
     const earliestDate = getEarliestPurchaseDate(purchases);
-    displayData(formatPrettyDate(earliestDate),'earliestDate');				
+    displayData(formatPrettyDate(earliestDate), 'earliestDate');
 
     // latest purchase date
     const latestDate = getLatestPurchaseDate(purchases);
-    displayData(formatPrettyDate(latestDate),'latestDate');	
+    displayData(formatPrettyDate(latestDate), 'latestDate');
 
     //clubcard duration
-    const dataDuration = getTimeBetween(earliestDate,latestDate);
-    displayData(dataDuration.years,'durationYears');
-    displayData(dataDuration.months,'durationMonths');
-    displayData(dataDuration.days,'durationDays');	
-    
+    const dataDuration = getTimeBetween(earliestDate, latestDate);
+    displayData(dataDuration.years, 'durationYears');
+    displayData(dataDuration.months, 'durationMonths');
+    displayData(dataDuration.days, 'durationDays');
+
     // total spent
     const totalSpent = getTotalAmountSpent(purchases);
-    displayData(formatValue(totalSpent),'totalSpent');				
+    displayData(formatValue(totalSpent), 'totalSpent');
 
     // total saved
     const totalSaved = getTotalAmountSaved(purchases);
-    displayData(totalSaved,'totalSaved');	
-      
+    displayData(totalSaved, 'totalSaved');
+
     // number transactions
     const countTransactions = purchases.length;
-    displayData(countTransactions,'totalTransactions');		
+    displayData(countTransactions, 'totalTransactions');
 
 
     //products purchased
 
     //Total Items
     const totalItems = getCountItems(purchases);
-    displayData(totalItems,'totalItems');	
+    displayData(totalItems, 'totalItems');
 
     //stores visited
-    const InstoresCounts = getCountInstores();
-    displayData(InstoresCounts,'InstoresCounts');	
+    const InstoresCounts = getCountInstores(purchases);
+    displayData(InstoresCounts, 'InstoresCounts');
 
 
     //// ----------- AVERAGES ------------
 
     //average spend
-    const averageSpend = getAverageSpend(totalSpent,countTransactions);
-    displayData(averageSpend,'averageSpend');	
+    const averageSpend = getAverageSpend(totalSpent, countTransactions);
+    displayData(averageSpend, 'averageSpend');
 
     //Average Weekly spend
     const averageWeeklySpend = calculateAverageSpentPerWeek(earliestDate, latestDate, totalSpent);
-    displayData(averageWeeklySpend,'averageWeeklySpend');
+    displayData(averageWeeklySpend, 'averageWeeklySpend');
 
     // frequency (every x days)
-    const purchaseFrequency = getFrequency(earliestDate, latestDate, countTransactions) 
-    displayData(purchaseFrequency,'frequency');	
+    const purchaseFrequency = getFrequency(earliestDate, latestDate, countTransactions)
+    displayData(purchaseFrequency, 'frequency');
 
     //Average Items
-    const averageItems = (totalItems/countTransactions).toFixed(1);
-    displayData(averageItems,'averageItems');
+    const averageItems = (totalItems / countTransactions).toFixed(1);
+    displayData(averageItems, 'averageItems');
 
 
     //// ----------- OUTLIERS ------------
 
     //mostExpensiveShop
     const mostExpensiveShop = getMostExpensiveShop(purchases);
-    displayData(formatPrettyDate(mostExpensiveShop.date),'expensiveShopDate');
-    displayData(mostExpensiveShop.storeName,'expensiveShopStore');
-    displayData(mostExpensiveShop.netBasketValue,'expensiveShopAmount');
+    displayData(formatPrettyDate(mostExpensiveShop.date), 'expensiveShopDate');
+    displayData(mostExpensiveShop.storeName, 'expensiveShopStore');
+    displayData(mostExpensiveShop.netBasketValue, 'expensiveShopAmount');
 
     //biggestShop
     const biggestShop = getBiggestShop(purchases);
-    displayData(formatPrettyDate(biggestShop.date),'biggestShopDate');
-    displayData(biggestShop.storeName,'biggestShopStore');
-    displayData(biggestShop.numberOfItems,'biggestShopItems');
-    
-    if (purchases.length > 1)  
-    {
+    displayData(formatPrettyDate(biggestShop.date), 'biggestShopDate');
+    displayData(biggestShop.storeName, 'biggestShopStore');
+    displayData(biggestShop.numberOfItems, 'biggestShopItems');
+
+    if (purchases.length > 1) {
 
         //longestGap
         const purchaseGaps = getGapBetweenPurchases(purchases);
-        displayData(purchaseGaps.longestDays,'longestGapDays');
-        displayData(formatPrettyDate(purchaseGaps.longestStartDate),'longestGapStart');
-        displayData(formatPrettyDate(purchaseGaps.longestEndDate),'longestGapEnd');
+        displayData(purchaseGaps.longestDays, 'longestGapDays');
+        displayData(formatPrettyDate(purchaseGaps.longestStartDate), 'longestGapStart');
+        displayData(formatPrettyDate(purchaseGaps.longestEndDate), 'longestGapEnd');
 
     }
 
 
 
     //// ----------- CHARTS and TABLES ------------
-    
+
     //stores
-    drawStoresWithCounts(purchases);
-    
+    drawStoresWithCounts(purchases,storeNames);
+
     //days of week
-    showPurchasesByDays('daysOfTheWeek');
-    
+    showPurchasesByDays('daysOfTheWeek', purchases);
+
     //all shops
-    createScatterChart('purchasesScatterChart');	
+    createScatterChart('purchasesScatterChart', purchases, storeNames);
 
 
 
 
 }
 
-function displayProductData() {
+export function displayProductData(aggregatedProducts, products) {
+
 
     // number products
     const countProducts = aggregatedProducts.length;
-    displayData(countProducts,'totalProducts');	
-    
+    displayData(countProducts, 'totalProducts');
+
 
     // Initial call to populate the product list on page load
-    updateTopProducts(3,'quantity-high','topQuanitityProductsTable');
-    updateTopProducts(3,'total-spent-high','topSpendProductsTable');
-    updateTopProducts(3,'max-price-high','topPriceProductsTable');
+    updateTopProducts(3, 'quantity-high', 'topQuanitityProductsTable', aggregatedProducts, products);
+    updateTopProducts(3, 'total-spent-high', 'topSpendProductsTable',aggregatedProducts, products);
+    updateTopProducts(3, 'max-price-high', 'topPriceProductsTable',aggregatedProducts, products);
+
+    setupEventListeners(aggregatedProducts, products);
 
 }
 
@@ -185,23 +193,23 @@ function displayProductData() {
 
 
 
-function displayWeeklyProductData() {
- 				
+export function displayWeeklyProductData(weeklyPurchases) {
+
     createWeeklyChart(weeklyPurchases, 'weeklyBarChart');
 
 }
 
 
 
-function displayData(data,element) {
-	const outputElement = document.getElementById(element);
-	
+function displayData(data, element) {
+    const outputElement = document.getElementById(element);
+
     if (element) {
-		outputElement.innerHTML = `${data}`;
+        outputElement.innerHTML = `${data}`;
 
     } else {
         console.error('Element not found with id:', element);
-    }	
+    }
 
 }
 
@@ -229,10 +237,10 @@ function createProgressBar(barId, barClass, percentage) {
 }
 
 
-function showPurchasesByDays(parentContainerId) {
-					
-	const allDaysSpend = getTotalSpentAndPercentageForAllDays(purchases);
-	const allDaysTransactions = getTotalTransactionsAndPercentageForAllDays(purchases);
+function showPurchasesByDays(parentContainerId,purchases) {
+
+    const allDaysSpend = getTotalSpentAndPercentageForAllDays(purchases);
+    const allDaysTransactions = getTotalTransactionsAndPercentageForAllDays(purchases);
 
     const daysOfWeek = ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday"];
     const parentContainer = document.getElementById(parentContainerId);
@@ -288,8 +296,9 @@ function showPurchasesByDays(parentContainerId) {
 
 
 
-function listProducts(topProducts,element) {
-    
+function listProducts(topProducts, element, products) {
+
+
     const container = document.getElementById(element); // Get the container
 
     container.innerHTML = ''; // Clear previous content
@@ -299,6 +308,8 @@ function listProducts(topProducts,element) {
     row.className = 'row d-flex flex-row';
 
     topProducts.forEach((product, index) => {
+
+
         const cleanedProductName = makeStringNameSafe(product.name);
 
         // Create a column for each card
@@ -341,13 +352,15 @@ function listProducts(topProducts,element) {
             chartCanvas.id = `card-chart-${element}-${cleanedProductName}-${index}`;
             chartCanvas.height = '70';
             chartCanvas.width = '272';
+            chartCanvas.setAttribute('aria-label', `${cleanedProductName} price line chart`);
+            chartCanvas.setAttribute('role', 'img');
             chartWrapper.appendChild(chartCanvas);
 
             card.appendChild(chartWrapper);
 
             // Defer chart initialization to ensure canvas is ready
             setTimeout(() => {
-                const chartConfig = createPriceChart(cleanedProductName); // Ensure this function exists and generates the right config
+                const chartConfig = createPriceChart(cleanedProductName, products); // Ensure this function exists and generates the right config
                 new Chart(document.getElementById(`card-chart-${element}-${cleanedProductName}-${index}`), chartConfig);
             }, 0);
         }
@@ -371,23 +384,24 @@ function listProducts(topProducts,element) {
 
 
 
-function updateTopProducts(numRecords,sortOrder,element) {
+export function updateTopProducts(numRecords, sortOrder, element,aggregatedProducts, products) {
+
     // Get the selected number of records and sort order from the dropdowns
 
     // Call getTopProducts with the selected values
-    const topProducts = getTopProducts(parseInt(numRecords, 10), sortOrder);
-    
+    const topProducts = getTopProducts(parseInt(numRecords, 10), sortOrder, aggregatedProducts);
+
     // Clear the current product list
     const container = document.getElementById(element);
     container.innerHTML = '';
 
     // Call listProducts to redraw the product cards with the new top products
-    listProducts(topProducts,element);
+    listProducts(topProducts, element, products);
 
 }
 
 
-async function downloadCSV(filename) {
+export async function downloadCSV(filename) {
 
     let arrayPromise;
 
@@ -415,8 +429,8 @@ async function downloadCSV(filename) {
         // Step 1: Convert array to CSV string
         // Convert the array to a CSV string
         const csvHeader = Object.keys(array[0]).join(',') + '\n';
-        const csvRows = array.map(row => 
-            Object.values(row).map(field => 
+        const csvRows = array.map(row =>
+            Object.values(row).map(field =>
                 `"${String(field).replace(/"/g, '""')}"` // Escape double quotes
             ).join(',')
         ).join('\n');
@@ -445,50 +459,20 @@ async function downloadCSV(filename) {
     });
 }
 
-document.addEventListener('DOMContentLoaded', function() {
-    const myModal = document.getElementById('myModal')
 
-    myModal.addEventListener('show.coreui.modal', event => {
-        // Button that triggered the modal
-        const button = event.relatedTarget;
-    
-        // Extract info from data-coreui-* attributes
-        const modalTitleContent = button.getAttribute('data-coreui-title');
-        const contentFile = button.getAttribute('data-coreui-content');
-        const footerFile = button.getAttribute('data-coreui-footer');
-    
-        // Set the content of #myModalLabel
-        const modalTitle = myModal.querySelector('#myModalLabel');
-        if (modalTitle) {
-            modalTitle.textContent = modalTitleContent;
-        }
+function setupEventListeners(aggregatedProducts,products) {
 
-        // Load the main content
-        fetch(contentFile)
-        .then(response => {
-            if (!response.ok) throw new Error(`Error loading modal content from ${contentFile}`);
-            return response.text();
-        })
-        .then(contentHtml => {
-            myModal.querySelector('#myModalBody').innerHTML = contentHtml;
-    
-            // If a footer content file is specified, load and append it to the footer
-            if (footerFile) {
-            fetch(footerFile)
-                .then(response => {
-                if (!response.ok) throw new Error(`Error loading footer content from ${footerFile}`);
-                return response.text();
-                })
-                .then(footerHtml => {
-                    myModal.querySelector('#myModalFooterButtons').innerHTML = footerHtml;
-                });
-            }
-        })
-        .catch(error => {
-            console.error('Error loading content:', error);
-            myModal.querySelector('#myModalBody').innerHTML = '<p>Sorry, the content could not be loaded. If you enabled Airplane mode, you will need to disable it to view this content.</p>';
-        });
+    //product number of records dropdown listeners
+    document.getElementById('totalSpendProductsNumRecordsDropdown').addEventListener('change', function() {
+        updateTopProducts(this.value, 'total-spent-high', 'topSpendProductsTable', aggregatedProducts, products);
     });
-});
 
-  
+    document.getElementById('topQuantityProductsNumRecordsDropdown').addEventListener('change', function() {
+        updateTopProducts(this.value, 'quantity-high','topQuanitityProductsTable', aggregatedProducts, products);
+    });
+
+    document.getElementById('topPriceProductsNumRecordsDropdown').addEventListener('change', function() {
+        updateTopProducts(this.value, 'max-price-high','topPriceProductsTable', aggregatedProducts, products);
+    });
+
+}

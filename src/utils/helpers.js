@@ -17,12 +17,12 @@ const colorPalette = [
 ];
 
 
-function getColor(index) {
+export function getColor(index) {
     const color = colorPalette[index % colorPalette.length]; // Use modulo to loop around
     return color;
 }
 
-function mapPurchaseType(type) {
+export function mapPurchaseType(type) {
     switch (type.toLowerCase()) {
         case 'in_store':
         case 'instore':
@@ -35,7 +35,7 @@ function mapPurchaseType(type) {
 }
 
 
-function makeStringNameSafe(inputString) {
+export function makeStringNameSafe(inputString) {
     // Replace all spaces with hyphens
     let formattedString = inputString.replace(/\s+/g, '-');
   
@@ -48,7 +48,7 @@ function makeStringNameSafe(inputString) {
 
 
 
-function formatDate(date) {
+  export function formatDate(date) {
     // Create a new Date object from the input date
     const dateObj = new Date(date);
 
@@ -62,7 +62,7 @@ function formatDate(date) {
 }
 
 
-function formatSQLDate(date) {
+export function formatSQLDate(date) {
     // Get the year, month, and day components from the Date object
     const year = date.getFullYear();
     const month = String(date.getMonth() + 1).padStart(2, '0'); // Add leading zero if necessary
@@ -77,7 +77,7 @@ function formatSQLDate(date) {
 
 
 
-function formatPrettyDate(date) {
+export function formatPrettyDate(date) {
     // Create a new Date object from the input date
     const dateObj = new Date(date);
 
@@ -91,7 +91,7 @@ function formatPrettyDate(date) {
 }
 
 
-function formatValue(value) {
+export function formatValue(value) {
     return new Intl.NumberFormat('en-GB', {
         style: 'currency',
         currency: 'GBP',
@@ -101,13 +101,13 @@ function formatValue(value) {
 
 
 // Helper function to find store info by storeId
-function findStoreInfo(storeId) {
+export function findStoreInfo(storeId,storeNames) {
     // Ensure storeId is treated as a string for comparison
     const storeIdStr = storeId.toString();
     return storeNames.find(store => store.storeId === storeIdStr);
 }
 
-async function secureHash(str) {
+export async function secureHash(str) {
     // Check if the crypto.subtle API is available and the page is served over HTTPS
     if (window.crypto && window.crypto.subtle && window.location.protocol === 'https:') {
         // Encode the string into a Uint8Array
@@ -140,7 +140,7 @@ function simpleHash(str) {
 }
 
 
-function generateGUID() {
+export function generateGUID() {
     return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function(c) {
         var r = Math.random() * 16 | 0, v = c === 'x' ? r : (r & 0x3 | 0x8);
         return v.toString(16);
@@ -149,12 +149,12 @@ function generateGUID() {
 
 
 // Function to generate a random offset within a given range
-function generateRandomOffset(range = 0.2) {
+export function generateRandomOffset(range = 0.2) {
     // Generate a random offset within the range [-range/2, range/2]
     return (Math.random() * range) - (range / 2);
 }
 
-function shiftValue(value, offset) {
+export function shiftValue(value, offset) {
     // Convert the input to a float to ensure accurate comparisons
     const numericValue = parseFloat(value);
 
@@ -169,7 +169,7 @@ function shiftValue(value, offset) {
 }
 
 
-function showToast(message, type) {
+export function showToast(message, type) {
 
     const toastContainer = document.getElementById('toastContainer');
     const toast = document.createElement('div');
@@ -191,36 +191,3 @@ function showToast(message, type) {
       toastContainer.removeChild(toast);
     }, 20000); // Auto-remove the toast after 20 seconds
   }
-
-
-
-  async function getSizes()
-  {
-    const wkly = getAnonPurchasesByWeek();
-    const purc = await getAnonPurchasesData();
-    const prod = await getAnonProductsData();
-
-    console.log('weekly', wkly);
-    console.log('purchases', purc);
-    console.log('products', prod);
-
-
-    console.log('weekly size', sizeInMB(wkly));
-    console.log('purchase size', sizeInMB(purc));
-    console.log('products size', sizeInMB(prod));
-
-  }
-
-  function sizeInMB(array) {
-    // Convert the array to a JSON string
-    const jsonString = JSON.stringify(array);
-
-    // Calculate the size in bytes
-    // Assuming each character in the JSON string is 2 bytes (UTF-16)
-    const sizeInBytes = jsonString.length * 2;
-
-    // Convert the size to megabytes (1 MB = 1,048,576 bytes)
-    const sizeInMB = sizeInBytes / 1024 / 1024;
-
-    return sizeInMB;
-}

@@ -1,5 +1,8 @@
+import Chart from 'chart.js/auto';
+import 'chartjs-adapter-date-fns';
+import { formatDate, findStoreInfo, getColor, makeStringNameSafe } from './helpers.js';
 
-function prepareScatterChartData(purchases) {
+function prepareScatterChartData(purchases,storeNames) {
     const datasets = {};
 
     purchases.forEach(purchase => {
@@ -33,9 +36,9 @@ function prepareScatterChartData(purchases) {
 
 
 
-function createScatterChart(chartElementId) {
+export function createScatterChart(chartElementId, purchases, storeNames) {
     const ctx = document.getElementById(chartElementId).getContext('2d');
-    const data = prepareScatterChartData(purchases);
+    const data = prepareScatterChartData(purchases, storeNames);
 
     const myScatterChart = new Chart(ctx, {
         type: 'scatter',
@@ -92,7 +95,7 @@ function createScatterChart(chartElementId) {
 }
 
 
-function generateCustomDynamicLegend(chart, legendContainerId, updateRollingAverage = false) {
+function generateCustomDynamicLegend(chart, legendContainerId, hasRollingAverage = false) {
     const legendContainer = document.getElementById(legendContainerId);
     legendContainer.innerHTML = ''; // Clear existing legend content
 
@@ -119,7 +122,7 @@ function generateCustomDynamicLegend(chart, legendContainerId, updateRollingAver
             chart.update(); // Refresh the chart to reflect changes
 
             // Recalculate and update the rolling average dynamically
-            if(updateRollingAverage == true) {
+            if(hasRollingAverage == true) {
                 updateRollingAverage(chart);
             }
         };
@@ -131,14 +134,14 @@ function generateCustomDynamicLegend(chart, legendContainerId, updateRollingAver
 
 
 
-function drawStoresWithCounts(purchases) {
+export function drawStoresWithCounts(purchases,storeNames) {
     const storeCounts = {};
     const storeValues = {};
     const backgroundColors = {};
 
     purchases.forEach(purchase => {
         const storeId = purchase.storeId;
-        const storeInfo = findStoreInfo(storeId); // Look up store info by storeId
+        const storeInfo = findStoreInfo(storeId,storeNames); // Look up store info by storeId
 
         if (!storeInfo) return; // Skip if store info is not found
 
@@ -155,7 +158,7 @@ function drawStoresWithCounts(purchases) {
 
     // Prepare labels using storeIds, mapping them back to store names
     const labels = Object.keys(storeCounts).map(storeId => {
-        const storeInfo = findStoreInfo(storeId);
+        const storeInfo = findStoreInfo(storeId,storeNames);
         return storeInfo && storeInfo.storeName ? storeInfo.storeName : 'Unknown';
     });
 
@@ -176,37 +179,46 @@ function drawStoresWithCounts(purchases) {
     ];
 
     const ctx = document.getElementById('storesVisitedChart').getContext('2d');
-    const chart = new Chart(ctx, {
-        type: 'doughnut',
-        data: {
-            labels: labels,
-            datasets: datasetsData
-        },
-        options: {
-            responsive: true,
-            plugins: {
-                legend: {
-                    display: false
-                },
-                tooltip: {
-                    callbacks: {
-                        label: function(context) {
-                            const label = context.label;
-                            const value = context.raw;
-                            const datasetLabel = context.dataset.label;
-                            if (datasetLabel.includes('Total Spent')) {
-                                return `${label}: £${value.toFixed(2)}`;
-                            } else {
-                                return `${label}: ${value} purchases`;
+
+    try {
+        const chart = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: datasetsData
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: {
+                        display: false
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label;
+                                const value = context.raw;
+                                const datasetLabel = context.dataset.label;
+                                if (datasetLabel.includes('Total Spent')) {
+                                    return `${label}: £${value.toFixed(2)}`;
+                                } else {
+                                    return `${label}: ${value} purchases`;
+                                }
                             }
                         }
                     }
                 }
             }
-        }
-    });
+        });
 
-    generateCustomDoughnutLegend(chart, 'storesVisitedChartLegend');
+        generateCustomDoughnutLegend(chart, 'storesVisitedChartLegend');
+        chart.update(); //sometimes the chart didn't appear and I could not work out why - this brute forces it.
+
+    } catch (error) {
+        console.error('Error while creating the chart:', error);
+    }
+
+
 }
 
 
@@ -239,7 +251,7 @@ function generateCustomDoughnutLegend(chart, elementId) {
 
 
 
-function createWeeklyChart(weeklyPurchases, chartElementId) {
+export function createWeeklyChart(weeklyPurchases, chartElementId) {
     // Determine the earliest and latest dates in the dataset
     const startDate = weeklyPurchases[0].weekCommencing;
     const endDate = weeklyPurchases[weeklyPurchases.length - 1].weekCommencing;
@@ -343,6 +355,8 @@ function createWeeklyChart(weeklyPurchases, chartElementId) {
         }
     });
 
+    myWeeklyChart.update(); //sometimes the chart appeared a funny size and I could not work out why - this brute forces it.
+
     // Initial calculation of rolling averages
     updateRollingAverage(myWeeklyChart);
 
@@ -402,7 +416,8 @@ function updateRollingAverage(chart) {
 
 
 
-function createPriceChart(productName) {
+export function createPriceChart(productName, products) {
+
     // Filter products for the given product name
     const filteredProducts = products.filter(product => makeStringNameSafe(product.name) === productName);
   

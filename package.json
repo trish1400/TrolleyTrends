@@ -1,0 +1,31 @@
+{
+  "name": "trolleytrends",
+  "version": "1.0.0",
+  "description": "Javascript visualiser of UK Supermarket loyalty card data",
+  "scripts": {
+    "start": "parcel src/index.html",
+    "build": "parcel build src/index.html --dist-dir dist",
+    "clear-cache": "parcel cache clean",
+    "postbuild": "ncp src/static dist/static"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@coreui/coreui": "^4.3.2",
+    "aos": "^2.3.4",
+    "chart.js": "^4.4.2",
+    "chartjs-adapter-date-fns": "^3.0.0",
+    "npc": "^0.0.1"
+  },
+  "devDependencies": {
+    "@parcel/packager-raw-url": "^2.12.0",
+    "@parcel/transformer-webmanifest": "^2.12.0",
+    "@parcel/transformer-xml": "^2.12.0",
+    "ncp": "^2.0.0",
+    "parcel": "^2.12.0"
+  },
+  "staticFiles": {
+    "staticPath": "src/static"
+  }
+}

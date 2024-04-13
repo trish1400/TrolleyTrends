@@ -1,3 +1,6 @@
+import {getAnonPurchasesData, getAnonPurchasesByWeek, getAnonProductsData } from './processData.js';
+import {showToast} from './helpers.js';
+
 // Define a function to perform a fetch with retry logic
 async function fetchWithRetry(url, data, contentType = 'application/json', maxRetries = 3, retryDelay = 1000) {
 
