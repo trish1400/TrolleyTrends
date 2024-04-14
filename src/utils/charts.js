@@ -427,8 +427,7 @@ export function createPriceChart(productName, products) {
     const filteredProducts = products.filter(product => makeStringNameSafe(product.name) === productName);
   
     // Sort by timestamp to ensure chronological order
-    filteredProducts.sort((a, b) => new Date(a.timeStamp) - new Date(b.timeStamp));
-
+    filteredProducts.sort((a, b) => new Date(a.date) - new Date(b.date));
   
     // Extract labels (dates), data (prices), and additional info for tooltips
     const labels = filteredProducts.map(product => formatDate(product.date));
